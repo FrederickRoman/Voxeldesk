@@ -1,5 +1,13 @@
+import { useEffect } from "react";
+import * as THREE from "three";
+
 function VoxelCanvas(): JSX.Element {
-  return <div>VoxelCanvas</div>;
+  useEffect(() => {
+    /**
+     * @todo Set up 3D voxel canvas editor
+     */
+  }, []);
+  return <canvas />;
 }
 
 export default VoxelCanvas;
