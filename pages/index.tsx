@@ -3,6 +3,8 @@ import Head from "next/head";
 import Image from "next/image";
 import styles from "../styles/Home.module.css";
 
+import VoxelEditor from "../components/editor/VoxelEditor";
+
 const Home: NextPage = () => {
   return (
     <>
@@ -14,7 +16,7 @@ const Home: NextPage = () => {
           content="Create voxel art online by clicking on a grid."
         />
       </Head>
-      <div>Home page</div>
+      <VoxelEditor />
     </>
   );
 };
