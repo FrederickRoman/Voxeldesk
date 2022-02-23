@@ -4,32 +4,33 @@ import {
   AmbientLight,
   DirectionalLight,
   GridHelper,
+  Intersection,
   Mesh,
   PerspectiveCamera,
   Scene,
-  Vector2,
   WebGLRenderer,
 } from "three";
 
 class VoxelWorld {
-  public camera!: PerspectiveCamera;
-  public scene!: Scene;
+  private camera!: PerspectiveCamera;
+  private scene!: Scene;
   private renderer!: WebGLRenderer;
-  public raycaster = new THREE.Raycaster();
-  public pointer = new THREE.Vector2();
-  public rollOverMesh!: Mesh;
-  public objects: any = [];
-  public isMouseDown = false;
-  onMouseDownPosition = new THREE.Vector2();
-  radius = 1600;
-  theta = 45;
-  onMouseDownTheta = 45;
-  phi = 60;
-  onMouseDownPhi = 60;
-  isShiftDown = false;
-  plane!: Mesh;
-  cubeGeo = new THREE.BoxGeometry(50, 50, 50);
-  cubeMaterial = new THREE.MeshLambertMaterial({ color: 0xfeb74c });
+  private raycaster = new THREE.Raycaster();
+  private pointer = new THREE.Vector2();
+  private rollOverMesh!: Mesh;
+  private objects: any = [];
+  private isMouseDown = false;
+  private onMouseDownPosition = new THREE.Vector2();
+  private theta = 45;
+  private onMouseDownTheta = 45;
+  private phi = 60;
+  private onMouseDownPhi = 60;
+  private isShiftDown = false;
+  private plane!: Mesh;
+  private readonly cubeGeo = new THREE.BoxGeometry(50, 50, 50);
+  private readonly cubeMaterial = new THREE.MeshLambertMaterial({
+    color: 0xfeb74c,
+  });
   constructor(canvas: HTMLCanvasElement) {
     this.camera = this.createCamera();
     this.scene = this.createScene();
@@ -44,17 +45,95 @@ class VoxelWorld {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.render();
   }
-  public orbit(theta: number, phi: number) {
+  public onDocumentMouseDown(event: React.MouseEvent): void {
+    event.preventDefault();
+    this.isMouseDown = true;
+    this.onMouseDownTheta = this.theta;
+    this.onMouseDownPhi = this.phi;
+    this.onMouseDownPosition.x = event.clientX;
+    this.onMouseDownPosition.y = event.clientY;
+  }
+  private clipToTopView(phi: number): number {
+    return Math.min(180, Math.max(0, phi));
+  }
+  public onDocumentMouseMove(event: React.MouseEvent): void {
+    event.preventDefault();
+    if (this.isMouseDown) {
+      this.theta =
+        -((event.clientX - this.onMouseDownPosition.x) * 0.5) +
+        this.onMouseDownTheta;
+      this.phi = this.clipToTopView(
+        (event.clientY - this.onMouseDownPosition.y) * 0.5 + this.onMouseDownPhi
+      );
+      this.orbit(this.theta, this.phi);
+    }
+    this.pointer.set(
+      (event.clientX / window.innerWidth) * 2 - 1,
+      -(event.clientY / window.innerHeight) * 2 + 1
+    );
+    const intersects = this.checkIntersects();
+    if (intersects.length > 0) {
+      const intersect = intersects[0];
+      if (intersect.face) {
+        this.rollOverMesh.position
+          .copy(intersect.point)
+          .add(intersect.face.normal)
+          .divideScalar(50)
+          .floor()
+          .multiplyScalar(50)
+          .addScalar(25);
+      }
+    }
+    this.render();
+  }
+  private checkIntersects(): Intersection[] {
+    this.raycaster.setFromCamera(this.pointer, this.camera);
+    return this.raycaster.intersectObjects(this.objects, false);
+  }
+  public onDocumentMouseUp(event: React.MouseEvent): void {
+    event.preventDefault();
+    this.isMouseDown = false;
+    this.onMouseDownPosition.x = event.clientX - this.onMouseDownPosition.x;
+    this.onMouseDownPosition.y = event.clientY - this.onMouseDownPosition.y;
+    if (this.onMouseDownPosition.length() > 5) return;
+
+    this.pointer.set(
+      (event.clientX / window.innerWidth) * 2 - 1,
+      -(event.clientY / window.innerHeight) * 2 + 1
+    );
+
+    const intersects = this.checkIntersects();
+    if (intersects.length > 0) {
+      const intersect = intersects[0];
+      if (this.isShiftDown) {
+        if (intersect.object !== this.plane) {
+          this.scene.remove(intersect.object);
+          this.objects.splice(this.objects.indexOf(intersect.object), 1);
+        }
+      } else {
+        if (intersect.face) {
+          const voxel = new THREE.Mesh(this.cubeGeo, this.cubeMaterial);
+          voxel.position
+            .copy(intersect.point)
+            .add(intersect.face.normal)
+            .divideScalar(50)
+            .floor()
+            .multiplyScalar(50)
+            .addScalar(25);
+          this.scene.add(voxel);
+          this.objects.push(voxel);
+        }
+      }
+      this.render();
+    }
+  }
+  private orbit(theta: number, phi: number): void {
     const RADIUS = 1600;
-    this.camera.position.x =
-      RADIUS *
-      Math.sin((theta * Math.PI) / 360) *
-      Math.cos((phi * Math.PI) / 360);
-    this.camera.position.y = RADIUS * Math.sin((phi * Math.PI) / 360);
-    this.camera.position.z =
-      RADIUS *
-      Math.cos((theta * Math.PI) / 360) *
-      Math.cos((phi * Math.PI) / 360);
+    const { sin, cos, PI } = Math;
+    const x = RADIUS * sin((theta * PI) / 360) * cos((phi * PI) / 360);
+    const y = RADIUS * sin((phi * PI) / 360);
+    const z = RADIUS * cos((theta * PI) / 360) * cos((phi * PI) / 360);
+    this.camera.position.set(x, y, z);
     this.camera.updateMatrix();
     this.camera.lookAt(0, 0, 0);
   }
@@ -123,130 +202,11 @@ class VoxelWorld {
     directionalLight.position.set(1, 0.75, 0.5).normalize();
     return directionalLight;
   }
-  onDocumentMouseDown(event: React.MouseEvent): void {
-    event.preventDefault();
-    this.isMouseDown = true;
-    this.onMouseDownTheta = this.theta;
-    this.onMouseDownPhi = this.phi;
-    this.onMouseDownPosition.x = event.clientX;
-    this.onMouseDownPosition.y = event.clientY;
-  }
-  onDocumentMouseMove(event: React.MouseEvent): void {
-    event.preventDefault();
-
-    if (this.isMouseDown) {
-      this.theta =
-        -((event.clientX - this.onMouseDownPosition.x) * 0.5) +
-        this.onMouseDownTheta;
-      this.phi =
-        (event.clientY - this.onMouseDownPosition.y) * 0.5 +
-        this.onMouseDownPhi;
-
-      this.phi = Math.min(180, Math.max(0, this.phi));
-
-      this.camera.position.x =
-        this.radius *
-        Math.sin((this.theta * Math.PI) / 360) *
-        Math.cos((this.phi * Math.PI) / 360);
-      this.camera.position.y =
-        this.radius * Math.sin((this.phi * Math.PI) / 360);
-      this.camera.position.z =
-        this.radius *
-        Math.cos((this.theta * Math.PI) / 360) *
-        Math.cos((this.phi * Math.PI) / 360);
-      this.camera.updateMatrix();
-      this.camera.lookAt(0, 0, 0);
-    }
-
-    this.pointer.set(
-      (event.clientX / window.innerWidth) * 2 - 1,
-      -(event.clientY / window.innerHeight) * 2 + 1
-    );
-
-    this.raycaster.setFromCamera(this.pointer, this.camera);
-
-    const intersects = this.raycaster.intersectObjects(this.objects, false);
-
-    if (intersects.length > 0) {
-      const intersect = intersects[0];
-
-      this.rollOverMesh.position
-        .copy(intersect.point)
-        //@ts-ignore
-        .add(intersect.face.normal);
-      this.rollOverMesh.position
-        .divideScalar(50)
-        .floor()
-        .multiplyScalar(50)
-        .addScalar(25);
-    }
-    this.render();
-  }
-  onDocumentMouseUp(event: React.MouseEvent): void {
-    event.preventDefault();
-
-    this.isMouseDown = false;
-
-    this.onMouseDownPosition.x = event.clientX - this.onMouseDownPosition.x;
-    this.onMouseDownPosition.y = event.clientY - this.onMouseDownPosition.y;
-
-    if (this.onMouseDownPosition.length() > 5) {
-      return;
-    }
-
-    this.pointer.set(
-      (event.clientX / window.innerWidth) * 2 - 1,
-      -(event.clientY / window.innerHeight) * 2 + 1
-    );
-
-    this.raycaster.setFromCamera(this.pointer, this.camera);
-
-    const intersects = this.raycaster.intersectObjects(this.objects, false);
-
-    if (intersects.length > 0) {
-      const intersect = intersects[0];
-
-      // delete cube
-
-      if (this.isShiftDown) {
-        if (intersect.object !== this.plane) {
-          this.scene.remove(intersect.object);
-
-          this.objects.splice(this.objects.indexOf(intersect.object), 1);
-        }
-
-        // create cube
-      } else {
-        const voxel = new THREE.Mesh(this.cubeGeo, this.cubeMaterial);
-        voxel.position
-          .copy(intersect.point)
-          //@ts-ignore
-          .add(intersect.face.normal);
-        voxel.position
-          .divideScalar(50)
-          .floor()
-          .multiplyScalar(50)
-          .addScalar(25);
-        this.scene.add(voxel);
-
-        this.objects.push(voxel);
-      }
-
-      this.render();
-    }
-  }
 }
 
 function VoxelCanvas(): JSX.Element {
-  const DEFAULT_THETA = 45;
-  const DEFAULT_PHI = 60;
-  let mouseDownPos = new THREE.Vector2();
-  let isMouseDown = false;
-  let theta = DEFAULT_THETA;
-  let phi = DEFAULT_PHI;
-  //const [mouseDownPos, setMouseDownPos] = useState<Vector2>(DEFAULT_POSITION);
   const [world, setWorld] = useState<VoxelWorld | null>(null);
-  const canvaRef = useRef(null);
+  const canvaRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
     const canvas = canvaRef.current;
@@ -264,9 +224,7 @@ function VoxelCanvas(): JSX.Element {
   }, []);
 
   const handleMouseDown = world?.onDocumentMouseDown.bind(world);
-
   const handleMouseMove = world?.onDocumentMouseMove.bind(world);
-
   const handleMouseUp = world?.onDocumentMouseUp.bind(world);
 
   return (
