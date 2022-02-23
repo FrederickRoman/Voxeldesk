@@ -10,6 +10,10 @@ const Home: NextPage = () => {
     <>
       <Head>
         <meta charSet="utf-8" />
+        <meta
+          name="viewport"
+          content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+        ></meta>
         <title>Voxeldesk</title>
         <meta
           name="description"
