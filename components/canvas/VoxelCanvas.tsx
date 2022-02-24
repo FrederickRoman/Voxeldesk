@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import {
   AmbientLight,
@@ -18,14 +18,13 @@ class VoxelWorld {
   private raycaster = new THREE.Raycaster();
   private pointer = new THREE.Vector2();
   private rollOverMesh!: Mesh;
-  private objects: any = [];
+  private objects: any[] = [];
   private isMouseDown = false;
   private onMouseDownPosition = new THREE.Vector2();
   private theta = 45;
   private onMouseDownTheta = 45;
   private phi = 60;
   private onMouseDownPhi = 60;
-  private isShiftDown = false;
   private plane!: Mesh;
   private readonly cubeGeo = new THREE.BoxGeometry(50, 50, 50);
   private readonly cubeMaterial = new THREE.MeshLambertMaterial({
@@ -47,6 +46,7 @@ class VoxelWorld {
   }
   public onDocumentMouseDown(event: React.MouseEvent): void {
     event.preventDefault();
+    if (event.button !== 0) return;
     this.isMouseDown = true;
     this.onMouseDownTheta = this.theta;
     this.onMouseDownPhi = this.phi;
@@ -58,6 +58,7 @@ class VoxelWorld {
   }
   public onDocumentMouseMove(event: React.MouseEvent): void {
     event.preventDefault();
+    if (event.button !== 0) return;
     if (this.isMouseDown) {
       this.theta =
         -((event.clientX - this.onMouseDownPosition.x) * 0.5) +
@@ -92,6 +93,7 @@ class VoxelWorld {
   }
   public onDocumentMouseUp(event: React.MouseEvent): void {
     event.preventDefault();
+    if (event.button !== 0) return;
     this.isMouseDown = false;
     this.onMouseDownPosition.x = event.clientX - this.onMouseDownPosition.x;
     this.onMouseDownPosition.y = event.clientY - this.onMouseDownPosition.y;
@@ -105,24 +107,37 @@ class VoxelWorld {
     const intersects = this.checkIntersects();
     if (intersects.length > 0) {
       const intersect = intersects[0];
-      if (this.isShiftDown) {
-        if (intersect.object !== this.plane) {
-          this.scene.remove(intersect.object);
-          this.objects.splice(this.objects.indexOf(intersect.object), 1);
-        }
-      } else {
-        if (intersect.face) {
-          const voxel = new THREE.Mesh(this.cubeGeo, this.cubeMaterial);
-          voxel.position
-            .copy(intersect.point)
-            .add(intersect.face.normal)
-            .divideScalar(50)
-            .floor()
-            .multiplyScalar(50)
-            .addScalar(25);
-          this.scene.add(voxel);
-          this.objects.push(voxel);
-        }
+      if (intersect.face) {
+        const voxel = new THREE.Mesh(this.cubeGeo, this.cubeMaterial);
+        voxel.position
+          .copy(intersect.point)
+          .add(intersect.face.normal)
+          .divideScalar(50)
+          .floor()
+          .multiplyScalar(50)
+          .addScalar(25);
+        this.scene.add(voxel);
+        this.objects.push(voxel);
+      }
+      this.render();
+    }
+  }
+  public onDocumentRightClick(event: React.MouseEvent): void {
+    event.preventDefault();
+    console.log("context menu");
+
+    this.pointer.set(
+      (event.clientX / window.innerWidth) * 2 - 1,
+      -(event.clientY / window.innerHeight) * 2 + 1
+    );
+
+    const intersects = this.checkIntersects();
+    console.log(intersects);
+    if (intersects.length > 0) {
+      const intersect = intersects[0];
+      if (intersect.object !== this.plane) {
+        this.scene.remove(intersect.object);
+        this.objects.splice(this.objects.indexOf(intersect.object), 1);
       }
       this.render();
     }
@@ -212,20 +227,27 @@ function VoxelCanvas(): JSX.Element {
     const canvas = canvaRef.current;
     if (canvas) {
       const world = new VoxelWorld(canvas);
-      const resize = world.resize.bind(world);
-      window.addEventListener("resize", resize);
       world.render();
       setWorld(world);
       return () => {
         canvaRef.current = null;
-        window.removeEventListener("resize", resize);
+        setWorld(null);
       };
+    }
+  }, []);
+  
+  useEffect(() => {
+    if (world) {
+      const resize = world.resize.bind(world);
+      window.addEventListener("resize", resize);
+      return () => window.removeEventListener("resize", resize);
     }
   }, []);
 
   const handleMouseDown = world?.onDocumentMouseDown.bind(world);
   const handleMouseMove = world?.onDocumentMouseMove.bind(world);
   const handleMouseUp = world?.onDocumentMouseUp.bind(world);
+  const handleLeftClick = world?.onDocumentRightClick.bind(world);
 
   return (
     <canvas
@@ -233,6 +255,7 @@ function VoxelCanvas(): JSX.Element {
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
+      onContextMenu={handleLeftClick}
     />
   );
 }
