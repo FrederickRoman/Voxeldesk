@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import {
   AmbientLight,
+  Color,
+  ColorRepresentation,
   DirectionalLight,
   GridHelper,
   Intersection,
@@ -10,6 +12,7 @@ import {
   Scene,
   WebGLRenderer,
 } from "three";
+import { HexColorPicker } from "react-colorful";
 
 interface VoxelTopology {
   vertices: { x: number; y: number; z: number }[];
@@ -31,14 +34,18 @@ class VoxelWorld {
   private phi = 60;
   private onMouseDownPhi = 60;
   private plane!: Mesh;
+  private pickedColor = new THREE.Color(0xfeb74c);
   private readonly cubeGeo = new THREE.BoxGeometry(50, 50, 50);
-  private readonly cubeMaterial = new THREE.MeshLambertMaterial({
+  private cubeMaterial = new THREE.MeshLambertMaterial({
     color: 0xfeb74c,
   });
   constructor(canvas: HTMLCanvasElement) {
     this.camera = this.createCamera();
     this.scene = this.createScene();
     this.renderer = this.createRenderer(canvas);
+  }
+  public setPickedColor(color: ColorRepresentation) {
+    this.pickedColor = new THREE.Color(color);
   }
   public render(): void {
     this.renderer.render(this.scene, this.camera);
@@ -119,7 +126,9 @@ class VoxelWorld {
     if (intersects.length > 0) {
       const intersect = intersects[0];
       if (intersect.face) {
-        const voxel = new THREE.Mesh(this.cubeGeo, this.cubeMaterial);
+        const cubeMaterial = this.cubeMaterial.clone();
+        cubeMaterial.color = this.pickedColor;
+        const voxel = new THREE.Mesh(this.cubeGeo, cubeMaterial);
         voxel.position
           .copy(intersect.point)
           .add(intersect.face.normal)
@@ -277,6 +286,7 @@ class VoxelWorld {
 
 function VoxelCanvas(): JSX.Element {
   const [world, setWorld] = useState<VoxelWorld | null>(null);
+  const [color, setColor] = useState("#aabbcc");
   const canvaRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -298,13 +308,21 @@ function VoxelCanvas(): JSX.Element {
       window.addEventListener("resize", resize);
       return () => window.removeEventListener("resize", resize);
     }
-  }, []);
+  }, [world]);
+
+  useEffect(() => {
+    console.log(color);
+  }, [color]);
 
   const handleMouseDown = world?.onDocumentMouseDown.bind(world);
   const handleMouseMove = world?.onDocumentMouseMove.bind(world);
   const handleMouseUp = world?.onDocumentMouseUp.bind(world);
   const handleLeftClick = world?.onDocumentRightClick.bind(world);
   const handleSave = world?.onDocumentSave.bind(world);
+  const handleColorChange = (color: string) => {
+    world?.setPickedColor(color);
+    setColor(color);
+  };
 
   return (
     <>
@@ -316,6 +334,7 @@ function VoxelCanvas(): JSX.Element {
         onContextMenu={handleLeftClick}
       />
       <button onClick={handleSave}>Save</button>
+      <HexColorPicker color={color} onChange={handleColorChange} />;
     </>
   );
 }
