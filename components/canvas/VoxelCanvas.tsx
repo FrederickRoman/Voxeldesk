@@ -11,6 +11,11 @@ import {
   WebGLRenderer,
 } from "three";
 
+interface VoxelTopology {
+  vertices: { x: number; y: number; z: number }[];
+  faces: number[][];
+}
+
 class VoxelWorld {
   private camera!: PerspectiveCamera;
   private scene!: Scene;
@@ -142,6 +147,51 @@ class VoxelWorld {
       this.render();
     }
   }
+  private topologizeVoxel(voxel: Mesh, id: number): VoxelTopology {
+    const OFFSET = 25;
+    const CUBE_FACES = Object.freeze([
+      [1, 2, 3, 4],
+      [2, 5, 6, 3],
+      [5, 6, 7, 8],
+      [8, 7, 4, 1],
+      [3, 6, 7, 4],
+      [2, 1, 8, 5],
+    ]);
+    const center = voxel.position;
+    const vertices = [
+      { x: center.x - OFFSET, y: center.y - OFFSET, z: center.z + OFFSET },
+      { x: center.x + OFFSET, y: center.y - OFFSET, z: center.z + OFFSET },
+      { x: center.x + OFFSET, y: center.y + OFFSET, z: center.z + OFFSET },
+      { x: center.x - OFFSET, y: center.y + OFFSET, z: center.z + OFFSET },
+      { x: center.x + OFFSET, y: center.y - OFFSET, z: center.z - OFFSET },
+      { x: center.x + OFFSET, y: center.y + OFFSET, z: center.z - OFFSET },
+      { x: center.x - OFFSET, y: center.y + OFFSET, z: center.z - OFFSET },
+      { x: center.x - OFFSET, y: center.y - OFFSET, z: center.z - OFFSET },
+    ];
+    const faces = CUBE_FACES.map((row) => row.map((entry) => entry + id));
+    return { vertices, faces };
+  }
+  public onDocumentSave(): void {
+    const NUM_CUBE_VERTICES = 8;
+    let objString = "";
+    this.objects
+      .filter(
+        (object) =>
+          object instanceof THREE.Mesh &&
+          object !== this.plane &&
+          object !== this.rollOverMesh
+      )
+      .map((voxel, i) => this.topologizeVoxel(voxel, NUM_CUBE_VERTICES * i))
+      .forEach(({ vertices, faces }) => {
+        vertices.forEach((vertex) => {
+          objString += `v ${vertex.x} ${vertex.y} ${vertex.z}\n`;
+        });
+        faces.forEach((face) => {
+          objString += `f ${face.join(" ")}\n`;
+        });
+      });
+    console.log(objString);
+  }
   private orbit(theta: number, phi: number): void {
     const RADIUS = 1600;
     const { sin, cos, PI } = Math;
@@ -235,7 +285,7 @@ function VoxelCanvas(): JSX.Element {
       };
     }
   }, []);
-  
+
   useEffect(() => {
     if (world) {
       const resize = world.resize.bind(world);
@@ -248,15 +298,19 @@ function VoxelCanvas(): JSX.Element {
   const handleMouseMove = world?.onDocumentMouseMove.bind(world);
   const handleMouseUp = world?.onDocumentMouseUp.bind(world);
   const handleLeftClick = world?.onDocumentRightClick.bind(world);
+  const handleSave = world?.onDocumentSave.bind(world);
 
   return (
-    <canvas
-      ref={canvaRef}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onContextMenu={handleLeftClick}
-    />
+    <>
+      <canvas
+        ref={canvaRef}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onContextMenu={handleLeftClick}
+      />
+      <button onClick={handleSave}>Save</button>
+    </>
   );
 }
 
