@@ -14,6 +14,8 @@ import {
 } from "three";
 import { HexColorPicker } from "react-colorful";
 
+type Voxel = Mesh<THREE.BoxGeometry, THREE.MeshLambertMaterial>;
+
 interface VoxelTopology {
   vertices: { x: number; y: number; z: number }[];
   faces: number[][];
@@ -163,7 +165,7 @@ class VoxelWorld {
       this.render();
     }
   }
-  private topologizeVoxel(voxel: Mesh, id: number): VoxelTopology {
+  private topologizeVoxel(voxel: Voxel, id: number): VoxelTopology {
     const OFFSET = 25;
     const CUBE_FACES = Object.freeze([
       [1, 2, 3, 4],
@@ -186,7 +188,7 @@ class VoxelWorld {
     ];
     const faces = CUBE_FACES.map((row) => row.map((entry) => entry + id));
     const color = voxel.material.color;
-    return { vertices, faces, color};
+    return { vertices, faces, color };
   }
   public onDocumentSave(): void {
     const NUM_CUBE_VERTICES = 8;
@@ -203,7 +205,7 @@ class VoxelWorld {
       .map((voxel, i) => this.topologizeVoxel(voxel, NUM_CUBE_VERTICES * i))
       .forEach(({ vertices, faces, color }) => {
         const colorName = color.getHex().toString(16);
-        if(!mtlSet.has(color)){
+        if (!mtlSet.has(color)) {
           mtlString += `newmtl ${colorName}\n`;
           mtlString += `Kd ${color.r} ${color.g} ${color.b}\n\n`;
           mtlSet.add(color);
@@ -216,7 +218,7 @@ class VoxelWorld {
           objString += `f ${face.join(" ")}\n`;
         });
       });
-    if(mtlString.length >0){
+    if (mtlString.length > 0) {
       objString = "mtllib ./material.mtl\n" + objString;
     }
     console.log(objString);
