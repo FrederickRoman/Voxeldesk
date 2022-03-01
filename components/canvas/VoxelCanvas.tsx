@@ -17,6 +17,7 @@ import { HexColorPicker } from "react-colorful";
 interface VoxelTopology {
   vertices: { x: number; y: number; z: number }[];
   faces: number[][];
+  color: THREE.Color;
 }
 
 class VoxelWorld {
@@ -184,11 +185,14 @@ class VoxelWorld {
       { x: center.x - OFFSET, y: center.y - OFFSET, z: center.z - OFFSET },
     ];
     const faces = CUBE_FACES.map((row) => row.map((entry) => entry + id));
-    return { vertices, faces };
+    const color = voxel.material.color;
+    return { vertices, faces, color};
   }
   public onDocumentSave(): void {
     const NUM_CUBE_VERTICES = 8;
     let objString = "";
+    let mtlString = "";
+    const mtlSet = new Set();
     this.objects
       .filter(
         (object) =>
@@ -197,7 +201,14 @@ class VoxelWorld {
           object !== this.rollOverMesh
       )
       .map((voxel, i) => this.topologizeVoxel(voxel, NUM_CUBE_VERTICES * i))
-      .forEach(({ vertices, faces }) => {
+      .forEach(({ vertices, faces, color }) => {
+        const colorName = color.getHex().toString(16);
+        if(!mtlSet.has(color)){
+          mtlString += `newmtl ${colorName}\n`;
+          mtlString += `Kd ${color.r} ${color.g} ${color.b}\n\n`;
+          mtlSet.add(color);
+        }
+        objString += `usemtl ${colorName}\n`;
         vertices.forEach((vertex) => {
           objString += `v ${vertex.x} ${vertex.y} ${vertex.z}\n`;
         });
@@ -205,7 +216,11 @@ class VoxelWorld {
           objString += `f ${face.join(" ")}\n`;
         });
       });
+    if(mtlString.length >0){
+      objString = "mtllib ./material.mtl\n" + objString;
+    }
     console.log(objString);
+    console.log(mtlString);
   }
   private orbit(theta: number, phi: number): void {
     const RADIUS = 1600;
