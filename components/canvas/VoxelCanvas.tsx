@@ -190,18 +190,20 @@ class VoxelWorld {
     const color = voxel.material.color;
     return { vertices, faces, color };
   }
+  private isVoxel(object: typeof this.objects[0]): boolean {
+    return (
+      object instanceof THREE.Mesh &&
+      object !== this.plane &&
+      object !== this.rollOverMesh
+    );
+  }
   public onDocumentSave(): void {
     const NUM_CUBE_VERTICES = 8;
+    const mtlSet = new Set<THREE.Color>();
     let objString = "";
     let mtlString = "";
-    const mtlSet = new Set();
     this.objects
-      .filter(
-        (object) =>
-          object instanceof THREE.Mesh &&
-          object !== this.plane &&
-          object !== this.rollOverMesh
-      )
+      .filter((object) => this.isVoxel(object))
       .map((voxel, i) => this.topologizeVoxel(voxel, NUM_CUBE_VERTICES * i))
       .forEach(({ vertices, faces, color }) => {
         const colorName = color.getHex().toString(16);
@@ -302,8 +304,9 @@ class VoxelWorld {
 }
 
 function VoxelCanvas(): JSX.Element {
+  const DEFAULT_COLOR = "#feb74c";
   const [world, setWorld] = useState<VoxelWorld | null>(null);
-  const [color, setColor] = useState("#aabbcc");
+  const [color, setColor] = useState<string>(DEFAULT_COLOR);
   const canvaRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -327,19 +330,25 @@ function VoxelCanvas(): JSX.Element {
     }
   }, [world]);
 
-  useEffect(() => {
-    console.log(color);
-  }, [color]);
+  useEffect(() => world?.setPickedColor(color), [world, color]);
+
+  const handleReset = () => {
+    const canvas = canvaRef.current;
+    if (canvas) {
+      const world = new VoxelWorld(canvas);
+      setWorld(null);
+      world.render();
+      setWorld(world);
+      setColor(DEFAULT_COLOR);
+    }
+  };
+  const handleColorChange = setColor;
 
   const handleMouseDown = world?.onDocumentMouseDown.bind(world);
   const handleMouseMove = world?.onDocumentMouseMove.bind(world);
   const handleMouseUp = world?.onDocumentMouseUp.bind(world);
   const handleLeftClick = world?.onDocumentRightClick.bind(world);
   const handleSave = world?.onDocumentSave.bind(world);
-  const handleColorChange = (color: string) => {
-    world?.setPickedColor(color);
-    setColor(color);
-  };
 
   return (
     <>
@@ -350,6 +359,7 @@ function VoxelCanvas(): JSX.Element {
         onMouseUp={handleMouseUp}
         onContextMenu={handleLeftClick}
       />
+      <button onClick={handleReset}>Reset</button>
       <button onClick={handleSave}>Save</button>
       <HexColorPicker color={color} onChange={handleColorChange} />;
     </>
