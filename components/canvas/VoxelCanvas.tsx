@@ -22,6 +22,11 @@ interface VoxelTopology {
   color: THREE.Color;
 }
 
+interface CGModel {
+  obj: string;
+  mtl: string;
+}
+
 class VoxelWorld {
   private camera!: PerspectiveCamera;
   private scene!: Scene;
@@ -197,7 +202,7 @@ class VoxelWorld {
       object !== this.rollOverMesh
     );
   }
-  public onDocumentSave(): void {
+  public onDocumentSave(): CGModel {
     const NUM_CUBE_VERTICES = 8;
     const mtlSet = new Set<THREE.Color>();
     let objString = "";
@@ -225,6 +230,7 @@ class VoxelWorld {
     }
     console.log(objString);
     console.log(mtlString);
+    return { obj: objString, mtl: mtlString };
   }
   private orbit(theta: number, phi: number): void {
     const RADIUS = 1600;
@@ -305,7 +311,9 @@ class VoxelWorld {
 
 function VoxelCanvas(): JSX.Element {
   const DEFAULT_COLOR = "#feb74c";
+  const DEFAULT_CG_MODEL = Object.freeze({ obj: "", mtl: "" });
   const [world, setWorld] = useState<VoxelWorld | null>(null);
+  const [cgModel, setCGmodel] = useState<CGModel>(DEFAULT_CG_MODEL);
   const [color, setColor] = useState<string>(DEFAULT_COLOR);
   const canvaRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -313,12 +321,9 @@ function VoxelCanvas(): JSX.Element {
     const canvas = canvaRef.current;
     if (canvas) {
       const world = new VoxelWorld(canvas);
-      world.render();
       setWorld(world);
-      return () => {
-        canvaRef.current = null;
-        setWorld(null);
-      };
+      world.render();
+      return () => setWorld(null);
     }
   }, []);
 
@@ -336,10 +341,15 @@ function VoxelCanvas(): JSX.Element {
     const canvas = canvaRef.current;
     if (canvas) {
       const world = new VoxelWorld(canvas);
-      setWorld(null);
-      world.render();
       setWorld(world);
+      world.render();
       setColor(DEFAULT_COLOR);
+    }
+  };
+  const handleSave = () => {
+    if (world) {
+      const cgModel = world.onDocumentSave.call(world);
+      setCGmodel(cgModel);
     }
   };
   const handleColorChange = setColor;
@@ -348,7 +358,7 @@ function VoxelCanvas(): JSX.Element {
   const handleMouseMove = world?.onDocumentMouseMove.bind(world);
   const handleMouseUp = world?.onDocumentMouseUp.bind(world);
   const handleLeftClick = world?.onDocumentRightClick.bind(world);
-  const handleSave = world?.onDocumentSave.bind(world);
+  // const handleSave = world?.onDocumentSave.bind(world);
 
   return (
     <>
@@ -359,9 +369,15 @@ function VoxelCanvas(): JSX.Element {
         onMouseUp={handleMouseUp}
         onContextMenu={handleLeftClick}
       />
-      <button onClick={handleReset}>Reset</button>
-      <button onClick={handleSave}>Save</button>
-      <HexColorPicker color={color} onChange={handleColorChange} />;
+      <section>
+        <pre>{cgModel.obj}</pre>
+        <pre>{cgModel.mtl}</pre>
+      </section>
+      <section>
+        <button onClick={handleReset}>Reset</button>
+        <button onClick={handleSave}>Save</button>
+        <HexColorPicker color={color} onChange={handleColorChange} />
+      </section>
     </>
   );
 }
