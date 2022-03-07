@@ -64,7 +64,7 @@ class VoxelWorld {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.render();
   }
-  public onDocumentMouseDown(event: React.MouseEvent): void {
+  public onMouseDown(event: React.MouseEvent): void {
     event.preventDefault();
     if (event.button !== 0) return;
     const { top, left } = event.currentTarget.getBoundingClientRect();
@@ -77,7 +77,7 @@ class VoxelWorld {
   private clipToTopView(phi: number): number {
     return Math.min(180, Math.max(0, phi));
   }
-  public onDocumentMouseMove(event: React.MouseEvent): void {
+  public onMouseMove(event: React.MouseEvent): void {
     event.preventDefault();
     if (event.button !== 0) return;
     const { top, left } = event.currentTarget.getBoundingClientRect();
@@ -114,7 +114,7 @@ class VoxelWorld {
     this.raycaster.setFromCamera(this.pointer, this.camera);
     return this.raycaster.intersectObjects(this.objects, false);
   }
-  public onDocumentMouseUp(event: React.MouseEvent): void {
+  public onMouseUp(event: React.MouseEvent): void {
     event.preventDefault();
     if (event.button !== 0) return;
     const { top, left } = event.currentTarget.getBoundingClientRect();
@@ -150,7 +150,7 @@ class VoxelWorld {
       this.render();
     }
   }
-  public onDocumentRightClick(event: React.MouseEvent): void {
+  public onRightClick(event: React.MouseEvent): void {
     event.preventDefault();
     if (event.button === 0) return;
     const { top, left } = event.currentTarget.getBoundingClientRect();
@@ -202,7 +202,7 @@ class VoxelWorld {
       object !== this.rollOverMesh
     );
   }
-  public onDocumentSave(): CGModel {
+  public onSave(): CGModel {
     const NUM_CUBE_VERTICES = 8;
     const mtlSet = new Set<THREE.Color>();
     let objString = "";
@@ -335,9 +335,12 @@ function VoxelCanvas(): JSX.Element {
     }
   }, [world]);
 
-  useEffect(() => world?.setPickedColor(color), [world, color]);
+  useEffect(() => {
+    world?.setPickedColor(color);
+  }, [world, color]);
 
-  const handleReset = () => {
+  
+  const resetWorld = (): void => {
     const canvas = canvaRef.current;
     if (canvas) {
       const world = new VoxelWorld(canvas);
@@ -346,19 +349,21 @@ function VoxelCanvas(): JSX.Element {
       setColor(DEFAULT_COLOR);
     }
   };
-  const handleSave = () => {
+
+  const saveCGmodel = (): void => {
     if (world) {
-      const cgModel = world.onDocumentSave.call(world);
+      const cgModel = world.onSave.call(world);
       setCGmodel(cgModel);
     }
   };
-  const handleColorChange = setColor;
 
-  const handleMouseDown = world?.onDocumentMouseDown.bind(world);
-  const handleMouseMove = world?.onDocumentMouseMove.bind(world);
-  const handleMouseUp = world?.onDocumentMouseUp.bind(world);
-  const handleLeftClick = world?.onDocumentRightClick.bind(world);
-  // const handleSave = world?.onDocumentSave.bind(world);
+  const handleMouseDown = world?.onMouseDown.bind(world);
+  const handleMouseMove = world?.onMouseMove.bind(world);
+  const handleMouseUp = world?.onMouseUp.bind(world);
+  const handleLeftClick = world?.onRightClick.bind(world);
+  const handleReset = resetWorld;
+  const handleSave = saveCGmodel;
+  const handleColorChange = setColor;
 
   return (
     <>
