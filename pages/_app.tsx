@@ -11,6 +11,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { CacheProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
 import theme from "themes/theme";
+import NavBar from "components/nav/NavBar";
 
 interface Props {
   Component: PropTypes.ReactComponentLike;
@@ -31,6 +32,7 @@ function MyApp(props: Props) {
       <StyledEngineProvider injectFirst>
         <ThemeProvider theme={theme}>
           <CssBaseline />
+          <NavBar />
           <Component {...pageProps} />
         </ThemeProvider>
       </StyledEngineProvider>
