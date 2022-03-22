@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import VoxelCanvas from "components/editor/canvas/VoxelCanvas";
+import VoxelEditor from "components/editor/VoxelEditor";
 
 const PageHead = (): JSX.Element => (
   <Head>
@@ -20,7 +20,7 @@ const PageHead = (): JSX.Element => (
 const Home: NextPage = () => (
   <>
     <PageHead />
-    <VoxelCanvas />
+    <VoxelEditor />
   </>
 );
 
