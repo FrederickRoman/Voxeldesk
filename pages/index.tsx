@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import VoxelCanvas from "../components/canvas/VoxelCanvas";
+import VoxelCanvas from "components/editor/canvas/VoxelCanvas";
 
 const PageHead = (): JSX.Element => (
   <Head>
