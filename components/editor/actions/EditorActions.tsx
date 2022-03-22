@@ -3,18 +3,17 @@ import { Box, SpeedDial, SpeedDialAction, SpeedDialIcon } from "@mui/material";
 import { Palette, Save, Undo } from "@mui/icons-material";
 import ColorPicker from "./color/ColorPicker";
 import Model3dSave from "components/editor/actions/save/Model3dSave";
-import EditionHistory from "./reset/ResetEditor";
-import type { Model3d } from "types/editorTypes";
-
-type Action = "Color" | "Save" | "Reset" | "";
+import ResetEditor from "./reset/ResetEditor";
+import type { Action, Model3d } from "types/editorTypes";
+import type VoxelWorld from "services/VoxelWord";
 
 interface Props {
-  handleReset: () => void;
-  color: string;
-  model3d: Model3d;
-  handleSaveModel3d: () => void;
-  handleColorChange: React.Dispatch<React.SetStateAction<string>>;
+  world: VoxelWorld | null;
+  handleResetWorld: () => void;
 }
+
+const DEFAULT_COLOR = "#feb74c";
+const DEFAULT_MODEL_3D = Object.freeze({ obj: "", mtl: "" });
 
 const EDITING_ACTIONS: readonly { icon: JSX.Element; name: Action }[] =
   Object.freeze([
@@ -24,20 +23,27 @@ const EDITING_ACTIONS: readonly { icon: JSX.Element; name: Action }[] =
   ]);
 
 function EditorActions(props: Props): JSX.Element {
-  const { handleReset, color, handleColorChange, model3d, handleSaveModel3d } =
-    props;
+  const { world, handleResetWorld } = props;
   const [open, setOpen] = useState<boolean>(false);
   const [action, setAction] = useState<Action>("");
+  const [model3d, setModel3d] = useState<Model3d>(DEFAULT_MODEL_3D);
+  const [color, setColor] = useState<string>(DEFAULT_COLOR);
+
+  useEffect(() => world?.setPickedColor(color), [world, color]);
 
   useEffect(() => {
     if (open) setAction("");
   }, [open]);
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-  const handleCloseOption = () => {
+  const handleOpen = (): void => setOpen(true);
+  const handleClose = (): void => setOpen(false);
+  const handleCloseAction = (): void => {
     setAction("");
     setOpen(false);
+  };
+  const handleColorChange = setColor;
+  const handleSaveModel3d = (): void => {
+    if (world) setModel3d(world.onSave.call(world));
   };
 
   return (
@@ -72,7 +78,7 @@ function EditorActions(props: Props): JSX.Element {
           <ColorPicker
             color={color}
             handleColorChange={handleColorChange}
-            handleCloseOption={handleCloseOption}
+            handleCloseOption={handleCloseAction}
           />
         ) : action == "Save" ? (
           <Model3dSave
@@ -80,7 +86,13 @@ function EditorActions(props: Props): JSX.Element {
             handleSaveModel3d={handleSaveModel3d}
           />
         ) : action == "Reset" ? (
-          <EditionHistory handleReset={handleReset} />
+          <ResetEditor
+            defaultColor={DEFAULT_COLOR}
+            defaultModel={DEFAULT_MODEL_3D}
+            setColor={setColor}
+            setModel3d={setModel3d}
+            resetWorldScene={handleResetWorld}
+          />
         ) : (
           ""
         )}
