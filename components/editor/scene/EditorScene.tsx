@@ -18,6 +18,7 @@ function EditorScene(props: Props): JSX.Element {
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
+      onMouseOut={handleMouseUp}
       onContextMenu={handleLeftClick}
     />
   );
