@@ -33,9 +33,8 @@ function ColorPicker(props: Props): JSX.Element {
             alignItems="center"
           >
             {colorsUsed.map((colorUsed, i) => (
-              <Grid item>
+              <Grid item key={i}>
                 <Box
-                  key={i}
                   height={20}
                   width={20}
                   sx={{ background: colorUsed }}

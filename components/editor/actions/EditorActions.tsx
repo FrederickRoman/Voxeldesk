@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
-import { Box, SpeedDial, SpeedDialAction, SpeedDialIcon } from "@mui/material";
-import { Palette, Save, Undo } from "@mui/icons-material";
+import {
+  Box,
+  Grid,
+  IconButton,
+  SpeedDial,
+  SpeedDialAction,
+  SpeedDialIcon,
+  Zoom,
+} from "@mui/material";
+import { Palette, Save, Undo, Edit } from "@mui/icons-material";
 import ColorPicker from "./color/ColorPicker";
 import Model3dSave from "components/editor/actions/save/Model3dSave";
 import ResetEditor from "./reset/ResetEditor";
@@ -64,56 +72,110 @@ function EditorActions(props: Props): JSX.Element {
   return (
     <Box component="section" height={256} mt={1}>
       <Box
-        component={SpeedDial}
-        ariaLabel="Editor actions speed dial"
+        // component={SpeedDial}
+        // ariaLabel="Editor actions speed dial"
         position="absolute"
-        bottom={16}
-        left={64}
-        icon={<SpeedDialIcon />}
-        onClose={handleClose}
-        onOpen={handleOpen}
-        open={open}
-        direction="down"
+        // bottom={16}
+        // left={64}
+        // icon={<SpeedDialIcon />}
+        // onClose={handleClose}
+        // onOpen={handleOpen}
+        // open={open}
+        // direction="down"
+        onClick={() => setOpen((v) => !v)}
       >
-        {EDITING_ACTIONS.map(({ name, icon }) => (
-          <SpeedDialAction
-            key={name}
-            icon={icon}
-            tooltipTitle={name}
-            tooltipOpen
-            onClick={() => {
-              setAction(name);
-              handleClose();
-            }}
-          />
-        ))}
+        <IconButton
+          size="large"
+          aria-label="edit"
+          sx={{
+            color: "white",
+            width: 40,
+            height: 40,
+            backgroundColor: "primary.main",
+            borderRadius: "50%",
+            padding: 0.2,
+            "&:hover": { color: "white", backgroundColor: "primary.dark" },
+          }}
+        >
+          <Edit />
+        </IconButton>
       </Box>
-      <Box component="section" position="relative" top={84} left={64}>
-        {action == "Color" ? (
-          <ColorPicker
-            color={color}
-            colorsUsed={colorsUsed}
-            handleColorChange={handleColorChange}
-            handleCloseOption={handleCloseAction}
-          />
-        ) : action == "Save" ? (
-          <Model3dSave
-            model3d={model3d}
-            handleSaveModel3d={handleSaveModel3d}
-          />
-        ) : action == "Reset" ? (
-          <ResetEditor
-            defaultColor={DEFAULT_COLOR}
-            defaultModel={DEFAULT_MODEL_3D}
-            setColor={setColor}
-            setColorsUsed={setColorsUsed}
-            setModel3d={setModel3d}
-            resetWorldScene={handleResetWorld}
-          />
-        ) : (
-          ""
-        )}
-      </Box>
+      <Zoom in={open} unmountOnExit>
+        <Box position="relative" top={50}>
+          {EDITING_ACTIONS.map(({ name, icon }) => (
+            <Box
+              key={name}
+              // icon={icon}
+              // tooltipTitle={name}
+              // tooltipOpen
+              onClick={() => {
+                setAction(name);
+                handleClose();
+              }}
+            >
+              <Grid
+                container
+                justifyContent="center"
+                alignItems="center"
+                gap={1}
+                my={1}
+              >
+                <Grid item>
+                  <IconButton
+                    aria-label="edit"
+                    sx={{
+                      color: "white",
+
+                      backgroundColor: "primary.light",
+                      borderRadius: "50%",
+
+                      "&:hover": {
+                        color: "white",
+                        backgroundColor: "primary.main",
+                      },
+                    }}
+                  >
+                    {icon}
+                  </IconButton>
+                </Grid>
+                <Grid item>{name}</Grid>
+              </Grid>
+            </Box>
+          ))}
+        </Box>
+      </Zoom>
+      <Zoom
+        in={action !== ""}
+        style={{ transitionDelay: "300ms" }}
+        unmountOnExit
+      >
+        <Box component="section" position="relative" top={50}>
+          {action == "Color" ? (
+            <ColorPicker
+              color={color}
+              colorsUsed={colorsUsed}
+              handleColorChange={handleColorChange}
+              handleCloseOption={handleCloseAction}
+            />
+          ) : action == "Save" ? (
+            <Model3dSave
+              model3d={model3d}
+              handleSaveModel3d={handleSaveModel3d}
+            />
+          ) : action == "Reset" ? (
+            <ResetEditor
+              defaultColor={DEFAULT_COLOR}
+              defaultModel={DEFAULT_MODEL_3D}
+              setColor={setColor}
+              setColorsUsed={setColorsUsed}
+              setModel3d={setModel3d}
+              resetWorldScene={handleResetWorld}
+            />
+          ) : (
+            ""
+          )}
+        </Box>
+      </Zoom>
     </Box>
   );
 }
