@@ -28,6 +28,7 @@ function EditorActions(props: Props): JSX.Element {
   const [action, setAction] = useState<Action>("");
   const [model3d, setModel3d] = useState<Model3d>(DEFAULT_MODEL_3D);
   const [color, setColor] = useState<string>(DEFAULT_COLOR);
+  const [colorsUsed, setColorsUsed] = useState<string[]>([DEFAULT_COLOR]);
 
   useEffect(() => world?.setPickedColor(color), [world, color]);
 
@@ -36,12 +37,26 @@ function EditorActions(props: Props): JSX.Element {
   }, [open]);
 
   const handleOpen = (): void => setOpen(true);
+
   const handleClose = (): void => setOpen(false);
+
   const handleCloseAction = (): void => {
     setAction("");
     setOpen(false);
   };
-  const handleColorChange = setColor;
+
+  const handleColorChange = (color: string): void => {
+    const MAX_NUM_COLORS_KEPT = 5;
+    setColorsUsed((prevColorsUsed) =>
+      prevColorsUsed.includes(color)
+        ? prevColorsUsed
+        : prevColorsUsed.length < MAX_NUM_COLORS_KEPT
+        ? [...prevColorsUsed, color]
+        : [...prevColorsUsed.slice(-(MAX_NUM_COLORS_KEPT - 1)), color]
+    );
+    setColor(color);
+  };
+
   const handleSaveModel3d = (): void => {
     if (world) setModel3d(world.onSave.call(world));
   };
@@ -77,6 +92,7 @@ function EditorActions(props: Props): JSX.Element {
         {action == "Color" ? (
           <ColorPicker
             color={color}
+            colorsUsed={colorsUsed}
             handleColorChange={handleColorChange}
             handleCloseOption={handleCloseAction}
           />
@@ -90,6 +106,7 @@ function EditorActions(props: Props): JSX.Element {
             defaultColor={DEFAULT_COLOR}
             defaultModel={DEFAULT_MODEL_3D}
             setColor={setColor}
+            setColorsUsed={setColorsUsed}
             setModel3d={setModel3d}
             resetWorldScene={handleResetWorld}
           />
