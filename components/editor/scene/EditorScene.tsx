@@ -11,7 +11,7 @@ function EditorScene(props: Props): JSX.Element {
   const handleMouseMove = world?.onMouseMove.bind(world);
   const handleMouseUp = world?.onMouseUp.bind(world);
   const handleLeftClick = world?.onRightClick.bind(world);
-
+  
   return (
     <canvas
       ref={canvasRef}

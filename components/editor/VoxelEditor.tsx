@@ -39,7 +39,11 @@ function VoxelEditor(): JSX.Element {
     <Box component="section" position="relative">
       <EditorScene canvasRef={canvasRef} world={world} />
       <Box position="absolute" top={0} left={6}>
-        <EditorActions world={world} handleResetWorld={handleResetWorld} />
+        <EditorActions
+          canvasRef={canvasRef}
+          world={world}
+          handleResetWorld={handleResetWorld}
+        />
       </Box>
     </Box>
   );
