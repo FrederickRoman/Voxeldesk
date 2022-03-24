@@ -33,9 +33,12 @@ class VoxelWorld {
   private onMouseDownPhi = 60;
   private plane!: Mesh;
   private pickedColor = new Color(0xfeb74c);
+  public usedColors: Color[] = [];
   private readonly cubeGeo = new BoxGeometry(50, 50, 50);
   private cubeMaterial = new MeshLambertMaterial({ color: 0xfeb74c });
+  private canvas!: HTMLCanvasElement;
   constructor(canvas: HTMLCanvasElement) {
+    this.canvas = canvas;
     this.camera = this.createCamera();
     this.scene = this.createScene();
     this.renderer = this.createRenderer(canvas);
@@ -102,6 +105,13 @@ class VoxelWorld {
     this.raycaster.setFromCamera(this.pointer, this.camera);
     return this.raycaster.intersectObjects(this.objects, false);
   }
+  public emitWorldChange(): void {
+    if (!this.usedColors.some((color) => color.equals(this.pickedColor)))
+      this.usedColors.push(this.pickedColor);
+    const payload = { detail: { name: [...this.usedColors] } };
+    const worldChange = new CustomEvent("worldChange", payload);
+    this.canvas.dispatchEvent(worldChange);
+  }
   public onMouseUp(event: React.MouseEvent): void {
     event.preventDefault();
     if (event.button !== 0) return;
@@ -134,6 +144,7 @@ class VoxelWorld {
           .addScalar(25);
         this.scene.add(voxel);
         this.objects.push(voxel);
+        this.emitWorldChange();
       }
       this.render();
     }
