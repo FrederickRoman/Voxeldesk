@@ -149,6 +149,7 @@ function EditorActions(props: Props): JSX.Element {
               setColorsUsed={setColorsUsed}
               setModel3d={setModel3d}
               resetWorldScene={handleResetWorld}
+              handleCloseAction={handleCloseAction}
             />
           ) : (
             ""
