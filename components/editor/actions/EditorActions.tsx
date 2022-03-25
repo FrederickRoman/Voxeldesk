@@ -90,7 +90,13 @@ function EditorActions(props: Props): JSX.Element {
       <Zoom in={open} unmountOnExit>
         <Box position="relative" top={50}>
           {EDITING_ACTIONS.map(({ name, icon }) => (
-            <Box key={name} onClick={() => handleOpenAction(name)}>
+            <Box
+              key={name}
+              onClick={() => {
+                if (name == "Save") handleSaveModel3d();
+                handleOpenAction(name);
+              }}
+            >
               <Grid
                 container
                 justifyContent="center"
@@ -134,10 +140,7 @@ function EditorActions(props: Props): JSX.Element {
               handleCloseOption={handleCloseAction}
             />
           ) : action == "Save" ? (
-            <Model3dSave
-              model3d={model3d}
-              handleSaveModel3d={handleSaveModel3d}
-            />
+            <Model3dSave model3d={model3d} handleCloseOption={handleCloseAction}/>
           ) : action == "Reset" ? (
             <ResetEditor
               defaultColor={DEFAULT_COLOR}
