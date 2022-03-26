@@ -9,7 +9,6 @@ import type VoxelWorld from "services/VoxelWord";
 import type { Color } from "three";
 
 interface Props {
-  canvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
   world: VoxelWorld | null;
   handleResetWorld: () => void;
 }
@@ -25,7 +24,7 @@ const EDITING_ACTIONS: readonly { icon: JSX.Element; name: Action }[] =
   ]);
 
 function EditorActions(props: Props): JSX.Element {
-  const { canvasRef, world, handleResetWorld } = props;
+  const { world, handleResetWorld } = props;
   const [open, setOpen] = useState<boolean>(false);
   const [action, setAction] = useState<Action>("");
   const [model3d, setModel3d] = useState<Model3d>(DEFAULT_MODEL_3D);
@@ -33,19 +32,18 @@ function EditorActions(props: Props): JSX.Element {
   const [colorsUsed, setColorsUsed] = useState<Color[]>([]);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    function keepWorldChanges(event: Event): void {
+    function keepUsedColors(event: Event): void {
       const MAX_NUM_COLORS_KEPT = 10;
-      const worldColors = (event as CustomEvent).detail.name;
+      const worldColors: Color[] = (event as CustomEvent).detail.usedColors;
       const colorsUsed =
         worldColors.length <= MAX_NUM_COLORS_KEPT
           ? worldColors
           : worldColors.slice(-MAX_NUM_COLORS_KEPT);
       setColorsUsed(colorsUsed);
     }
-    canvas?.addEventListener("worldChange", keepWorldChanges);
-    return () => canvas?.removeEventListener("worldChange", keepWorldChanges);
-  }, []);
+    world?.eventBus.on("usedColorsChange", keepUsedColors);
+    return () => world?.eventBus.off("usedColorsChange", keepUsedColors);
+  }, [world]);
 
   useEffect(() => world?.setPickedColor(color), [world, color]);
 
@@ -140,7 +138,10 @@ function EditorActions(props: Props): JSX.Element {
               handleCloseOption={handleCloseAction}
             />
           ) : action == "Save" ? (
-            <Model3dSave model3d={model3d} handleCloseOption={handleCloseAction}/>
+            <Model3dSave
+              model3d={model3d}
+              handleCloseOption={handleCloseAction}
+            />
           ) : action == "Reset" ? (
             <ResetEditor
               defaultColor={DEFAULT_COLOR}

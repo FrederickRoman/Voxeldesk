@@ -16,6 +16,7 @@ import {
   WebGLRenderer,
 } from "three";
 import type { Model3d, Voxel, VoxelTopology } from "types/editorTypes";
+import EventBus from "./EventBus";
 
 class VoxelWorld {
   private camera!: PerspectiveCamera;
@@ -33,12 +34,11 @@ class VoxelWorld {
   private onMouseDownPhi = 60;
   private plane!: Mesh;
   private pickedColor = new Color(0xfeb74c);
-  public usedColors: Color[] = [];
+  private usedColors: Color[] = [];
   private readonly cubeGeo = new BoxGeometry(50, 50, 50);
   private cubeMaterial = new MeshLambertMaterial({ color: 0xfeb74c });
-  private canvas!: HTMLCanvasElement;
+  public eventBus = new EventBus();
   constructor(canvas: HTMLCanvasElement) {
-    this.canvas = canvas;
     this.camera = this.createCamera();
     this.scene = this.createScene();
     this.renderer = this.createRenderer(canvas);
@@ -105,12 +105,13 @@ class VoxelWorld {
     this.raycaster.setFromCamera(this.pointer, this.camera);
     return this.raycaster.intersectObjects(this.objects, false);
   }
-  public emitWorldChange(): void {
-    if (!this.usedColors.some((color) => color.equals(this.pickedColor)))
-      this.usedColors.push(this.pickedColor);
-    const payload = { detail: { name: [...this.usedColors] } };
-    const worldChange = new CustomEvent("worldChange", payload);
-    this.canvas.dispatchEvent(worldChange);
+  private emitWorldChange(state: string): void {
+    if (state == "usedColors") {
+      if (!this.usedColors.some((color) => color.equals(this.pickedColor)))
+        this.usedColors.push(this.pickedColor);
+      const payload = { usedColors: [...this.usedColors] };
+      this.eventBus.emit("usedColorsChange", payload);
+    }
   }
   public onMouseUp(event: React.MouseEvent): void {
     event.preventDefault();
@@ -144,7 +145,7 @@ class VoxelWorld {
           .addScalar(25);
         this.scene.add(voxel);
         this.objects.push(voxel);
-        this.emitWorldChange();
+        this.emitWorldChange("usedColors");
       }
       this.render();
     }
@@ -266,7 +267,6 @@ class VoxelWorld {
     this.objects.push(plane);
     scene.add(ambientLight);
     scene.add(directionalLight);
-    console.log(this.camera);
     return scene;
   }
   private createRenderer(canvas: HTMLCanvasElement) {
