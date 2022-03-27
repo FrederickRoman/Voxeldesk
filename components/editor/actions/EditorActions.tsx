@@ -13,9 +13,11 @@ interface Props {
   handleResetWorld: () => void;
 }
 
+const DEFAULT_OPEN = false;
+const DEFAULT_ACTION = "";
 const DEFAULT_COLOR = "#feb74c";
+const DEFAULT_COLORS_USED: Color[] = [];
 const DEFAULT_MODEL_3D = Object.freeze({ obj: "", mtl: "" });
-
 const EDITING_ACTIONS: readonly { icon: JSX.Element; name: Action }[] =
   Object.freeze([
     { icon: <Palette />, name: "Color" },
@@ -25,11 +27,11 @@ const EDITING_ACTIONS: readonly { icon: JSX.Element; name: Action }[] =
 
 function EditorActions(props: Props): JSX.Element {
   const { world, handleResetWorld } = props;
-  const [open, setOpen] = useState<boolean>(false);
-  const [action, setAction] = useState<Action>("");
-  const [model3d, setModel3d] = useState<Model3d>(DEFAULT_MODEL_3D);
+  const [open, setOpen] = useState<boolean>(DEFAULT_OPEN);
+  const [action, setAction] = useState<Action>(DEFAULT_ACTION);
   const [color, setColor] = useState<string>(DEFAULT_COLOR);
-  const [colorsUsed, setColorsUsed] = useState<Color[]>([]);
+  const [colorsUsed, setColorsUsed] = useState<Color[]>(DEFAULT_COLORS_USED);
+  const [model3d, setModel3d] = useState<Model3d>(DEFAULT_MODEL_3D);
 
   useEffect(() => {
     function keepUsedColors(event: Event): void {
