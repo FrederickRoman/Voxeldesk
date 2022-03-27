@@ -156,6 +156,7 @@ function EditorActions(props: Props): JSX.Element {
             />
           ) : action == "Save" ? (
             <Model3dSave
+              defaultModel={DEFAULT_MODEL_3D}
               model3d={model3d}
               handleCloseOption={handleCloseAction}
             />
