@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Box, Grid, IconButton, Zoom } from "@mui/material";
-import { Palette, Save, Undo, Edit } from "@mui/icons-material";
+import { Palette, Save, Edit, RestartAlt } from "@mui/icons-material";
 import ColorPicker from "./color/ColorPicker";
 import Model3dSave from "components/editor/actions/save/Model3dSave";
 import ResetEditor from "./reset/ResetEditor";
@@ -20,7 +20,7 @@ const EDITING_ACTIONS: readonly { icon: JSX.Element; name: Action }[] =
   Object.freeze([
     { icon: <Palette />, name: "Color" },
     { icon: <Save />, name: "Save" },
-    { icon: <Undo />, name: "Reset" },
+    { icon: <RestartAlt />, name: "Reset" },
   ]);
 
 function EditorActions(props: Props): JSX.Element {
