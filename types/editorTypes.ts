@@ -1,7 +1,7 @@
 import type { Mesh, BoxGeometry, MeshLambertMaterial, Color } from "three";
 
 export type Voxel = Mesh<BoxGeometry, MeshLambertMaterial>;
-export type Action = "Color" | "Save" | "Reset" | "";
+export type Action = "Color" | "Undo" | "Reset" | "Save" | "";
 
 export interface VoxelTopology {
   vertices: { x: number; y: number; z: number }[];
