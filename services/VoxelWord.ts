@@ -8,6 +8,7 @@ import {
   Mesh,
   MeshBasicMaterial,
   MeshLambertMaterial,
+  Object3D,
   PerspectiveCamera,
   PlaneGeometry,
   Raycaster,
@@ -25,7 +26,7 @@ class VoxelWorld {
   private raycaster = new Raycaster();
   private pointer = new Vector2();
   private rollOverMesh!: Mesh;
-  private objects: any[] = [];
+  private objects: (Voxel | Object3D<THREE.Event>)[] = [];
   private isMouseDown = false;
   private onMouseDownPosition = new Vector2();
   private theta = 45;
@@ -68,7 +69,7 @@ class VoxelWorld {
   public onTouchStart(event: React.TouchEvent): void {
     //event.preventDefault();
     //if (event.button !== 0) return;
-    console.log('onTouchStart')
+    console.log("onTouchStart");
     const { top, left } = event.currentTarget.getBoundingClientRect();
     this.isMouseDown = true;
     this.onMouseDownTheta = this.theta;
@@ -113,14 +114,16 @@ class VoxelWorld {
     this.render();
   }
   public onTouchMove(event: React.TouchEvent): void {
-    console.log("onTouchMove")
+    console.log("onTouchMove");
     //event.preventDefault();
     // if (event.button !== 0) return;
     const { top, left } = event.currentTarget.getBoundingClientRect();
     if (this.isMouseDown) {
       this.theta =
-        -((event.touches[0].clientX - left - this.onMouseDownPosition.x) * 0.5) +
-        this.onMouseDownTheta;
+        -(
+          (event.touches[0].clientX - left - this.onMouseDownPosition.x) *
+          0.5
+        ) + this.onMouseDownTheta;
       this.phi = this.clipToTopView(
         (event.touches[0].clientY - top - this.onMouseDownPosition.y) * 0.5 +
           this.onMouseDownPhi
@@ -196,8 +199,8 @@ class VoxelWorld {
     }
   }
   public onTouchEnd(event: React.TouchEvent): void {
-    console.log("onTouchEnd")
-    console.log(event)
+    console.log("onTouchEnd");
+    console.log(event);
     // event.preventDefault();
     // if (event.button !== 0) return;
     const { top, left } = event.currentTarget.getBoundingClientRect();
@@ -254,6 +257,15 @@ class VoxelWorld {
       this.render();
     }
   }
+  public onUndo(): void {
+    const lastObjectAdded = this.objects.slice(0 - 1)[0];
+    if (this.isVoxel(lastObjectAdded)) {
+      this.scene.remove(lastObjectAdded);
+      this.objects.pop();
+    }
+
+    this.render();
+  }
   private topologizeVoxel(voxel: Voxel, id: number): VoxelTopology {
     const OFFSET = 25;
     const CUBE_FACES = Object.freeze([
@@ -279,11 +291,13 @@ class VoxelWorld {
     const color = voxel.material.color;
     return { vertices, faces, color };
   }
-  private isVoxel(object: typeof this.objects[0]): boolean {
+  private isVoxel(object: Voxel | Object3D<THREE.Event>): boolean {
     return (
       object instanceof Mesh &&
       object !== this.plane &&
-      object !== this.rollOverMesh
+      object !== this.rollOverMesh &&
+      object.position &&
+      object.material !== undefined
     );
   }
   public onSave(): Model3d {
@@ -293,6 +307,7 @@ class VoxelWorld {
     let mtlString = "";
     this.objects
       .filter((object) => this.isVoxel(object))
+      .map((voxel): Voxel => voxel as Voxel)
       .map((voxel, i) => this.topologizeVoxel(voxel, NUM_CUBE_VERTICES * i))
       .forEach(({ vertices, faces, color }) => {
         const colorName = color.getHex().toString(16);
