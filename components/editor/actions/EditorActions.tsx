@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { Box, Grid, IconButton, Zoom } from "@mui/material";
-import { Palette, Save, Edit, RestartAlt, Undo } from "@mui/icons-material";
+import {
+  Palette,
+  Save,
+  Edit,
+  RestartAlt,
+  Undo,
+  Close,
+} from "@mui/icons-material";
 import ColorPicker from "./color/ColorPicker";
 import Model3dSave from "components/editor/actions/save/Model3dSave";
 import ResetEditor from "./reset/ResetEditor";
@@ -95,7 +102,7 @@ function EditorActions(props: Props): JSX.Element {
             "&:hover": { color: "white", backgroundColor: "primary.dark" },
           }}
         >
-          <Edit />
+          {open ? <Close /> : <Edit />}
         </IconButton>
       </Box>
       <Zoom in={open} unmountOnExit>
