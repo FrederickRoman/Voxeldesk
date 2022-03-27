@@ -11,7 +11,10 @@ function EditorScene(props: Props): JSX.Element {
   const handleMouseMove = world?.onMouseMove.bind(world);
   const handleMouseUp = world?.onMouseUp.bind(world);
   const handleLeftClick = world?.onRightClick.bind(world);
-  
+  const handleTouchStart = world?.onTouchStart.bind(world);
+  const handleTouchMove = world?.onTouchMove.bind(world);
+  const handleTouchEnd = world?.onTouchEnd.bind(world);
+
   return (
     <canvas
       ref={canvasRef}
@@ -20,6 +23,10 @@ function EditorScene(props: Props): JSX.Element {
       onMouseUp={handleMouseUp}
       onMouseOut={handleMouseUp}
       onContextMenu={handleLeftClick}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      style={{ touchAction: "pinch-zoom"}}
     />
   );
 }
