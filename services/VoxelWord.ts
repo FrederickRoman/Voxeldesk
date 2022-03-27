@@ -201,7 +201,7 @@ class VoxelWorld {
   public onTouchEnd(event: React.TouchEvent): void {
     console.log("onTouchEnd");
     console.log(event);
-    // event.preventDefault();
+    event.preventDefault();
     // if (event.button !== 0) return;
     const { top, left } = event.currentTarget.getBoundingClientRect();
     this.isMouseDown = false;
