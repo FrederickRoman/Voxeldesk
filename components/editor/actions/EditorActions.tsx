@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Box, Grid, IconButton, Zoom } from "@mui/material";
-import { Palette, Save, Edit, RestartAlt } from "@mui/icons-material";
+import { Palette, Save, Edit, RestartAlt, Undo } from "@mui/icons-material";
 import ColorPicker from "./color/ColorPicker";
 import Model3dSave from "components/editor/actions/save/Model3dSave";
 import ResetEditor from "./reset/ResetEditor";
@@ -21,8 +21,9 @@ const DEFAULT_MODEL_3D = Object.freeze({ obj: "", mtl: "" });
 const EDITING_ACTIONS: readonly { icon: JSX.Element; name: Action }[] =
   Object.freeze([
     { icon: <Palette />, name: "Color" },
-    { icon: <Save />, name: "Save" },
+    { icon: <Undo />, name: "Undo" },
     { icon: <RestartAlt />, name: "Reset" },
+    { icon: <Save />, name: "Save" },
   ]);
 
 function EditorActions(props: Props): JSX.Element {
@@ -67,6 +68,16 @@ function EditorActions(props: Props): JSX.Element {
   const handleSaveModel3d = (): void => {
     if (world) setModel3d(world.onSave.call(world));
   };
+  const handleUndoEdit = (): void => world?.onUndo.call(world);
+
+  const handleActionClick = (name: Action): void => {
+    if (name == "Undo") {
+      handleUndoEdit();
+    } else {
+      if (name == "Save") handleSaveModel3d();
+      handleOpenAction(name);
+    }
+  };
 
   return (
     <Box component="section" height={256} mt={1}>
@@ -90,13 +101,7 @@ function EditorActions(props: Props): JSX.Element {
       <Zoom in={open} unmountOnExit>
         <Box position="relative" top={50}>
           {EDITING_ACTIONS.map(({ name, icon }) => (
-            <Box
-              key={name}
-              onClick={() => {
-                if (name == "Save") handleSaveModel3d();
-                handleOpenAction(name);
-              }}
-            >
+            <Box key={name} onClick={() => handleActionClick(name)}>
               <Grid
                 container
                 justifyContent="center"
@@ -139,11 +144,6 @@ function EditorActions(props: Props): JSX.Element {
               handleColorChange={handleColorChange}
               handleCloseOption={handleCloseAction}
             />
-          ) : action == "Save" ? (
-            <Model3dSave
-              model3d={model3d}
-              handleCloseOption={handleCloseAction}
-            />
           ) : action == "Reset" ? (
             <ResetEditor
               defaultColor={DEFAULT_COLOR}
@@ -153,6 +153,11 @@ function EditorActions(props: Props): JSX.Element {
               setModel3d={setModel3d}
               resetWorldScene={handleResetWorld}
               handleCloseAction={handleCloseAction}
+            />
+          ) : action == "Save" ? (
+            <Model3dSave
+              model3d={model3d}
+              handleCloseOption={handleCloseAction}
             />
           ) : (
             ""
