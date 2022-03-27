@@ -65,6 +65,17 @@ class VoxelWorld {
     this.onMouseDownPosition.x = event.clientX - left;
     this.onMouseDownPosition.y = event.clientY - top;
   }
+  public onTouchStart(event: React.TouchEvent): void {
+    //event.preventDefault();
+    //if (event.button !== 0) return;
+    console.log('onTouchStart')
+    const { top, left } = event.currentTarget.getBoundingClientRect();
+    this.isMouseDown = true;
+    this.onMouseDownTheta = this.theta;
+    this.onMouseDownPhi = this.phi;
+    this.onMouseDownPosition.x = event.touches[0].clientX - left;
+    this.onMouseDownPosition.y = event.touches[0].clientY - top;
+  }
   private clipToTopView(phi: number): number {
     return Math.min(180, Math.max(0, phi));
   }
@@ -85,6 +96,40 @@ class VoxelWorld {
     this.pointer.set(
       ((event.clientX - left) / window.innerWidth) * 2 - 1,
       -((event.clientY - top) / window.innerHeight) * 2 + 1
+    );
+    const intersects = this.checkIntersects();
+    if (intersects.length > 0) {
+      const intersect = intersects[0];
+      if (intersect.face) {
+        this.rollOverMesh.position
+          .copy(intersect.point)
+          .add(intersect.face.normal)
+          .divideScalar(50)
+          .floor()
+          .multiplyScalar(50)
+          .addScalar(25);
+      }
+    }
+    this.render();
+  }
+  public onTouchMove(event: React.TouchEvent): void {
+    console.log("onTouchMove")
+    //event.preventDefault();
+    // if (event.button !== 0) return;
+    const { top, left } = event.currentTarget.getBoundingClientRect();
+    if (this.isMouseDown) {
+      this.theta =
+        -((event.touches[0].clientX - left - this.onMouseDownPosition.x) * 0.5) +
+        this.onMouseDownTheta;
+      this.phi = this.clipToTopView(
+        (event.touches[0].clientY - top - this.onMouseDownPosition.y) * 0.5 +
+          this.onMouseDownPhi
+      );
+      this.orbit(this.theta, this.phi);
+    }
+    this.pointer.set(
+      ((event.touches[0].clientX - left) / window.innerWidth) * 2 - 1,
+      -((event.touches[0].clientY - top) / window.innerHeight) * 2 + 1
     );
     const intersects = this.checkIntersects();
     if (intersects.length > 0) {
@@ -127,6 +172,45 @@ class VoxelWorld {
     this.pointer.set(
       ((event.clientX - left) / window.innerWidth) * 2 - 1,
       -((event.clientY - top) / window.innerHeight) * 2 + 1
+    );
+
+    const intersects = this.checkIntersects();
+    if (intersects.length > 0) {
+      const intersect = intersects[0];
+      if (intersect.face) {
+        const cubeMaterial = this.cubeMaterial.clone();
+        cubeMaterial.color = this.pickedColor;
+        const voxel = new Mesh(this.cubeGeo, cubeMaterial);
+        voxel.position
+          .copy(intersect.point)
+          .add(intersect.face.normal)
+          .divideScalar(50)
+          .floor()
+          .multiplyScalar(50)
+          .addScalar(25);
+        this.scene.add(voxel);
+        this.objects.push(voxel);
+        this.emitWorldChange("usedColors");
+      }
+      this.render();
+    }
+  }
+  public onTouchEnd(event: React.TouchEvent): void {
+    console.log("onTouchEnd")
+    console.log(event)
+    // event.preventDefault();
+    // if (event.button !== 0) return;
+    const { top, left } = event.currentTarget.getBoundingClientRect();
+    this.isMouseDown = false;
+    this.onMouseDownPosition.x =
+      event.changedTouches[0].clientX - left - this.onMouseDownPosition.x;
+    this.onMouseDownPosition.y =
+      event.changedTouches[0].clientY - top - this.onMouseDownPosition.y;
+    if (this.onMouseDownPosition.length() > 5) return;
+
+    this.pointer.set(
+      ((event.changedTouches[0].clientX - left) / window.innerWidth) * 2 - 1,
+      -((event.changedTouches[0].clientY - top) / window.innerHeight) * 2 + 1
     );
 
     const intersects = this.checkIntersects();
