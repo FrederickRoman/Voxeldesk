@@ -105,6 +105,13 @@ function EditorActions(props: Props): JSX.Element {
           {open ? <Close /> : <Edit />}
         </IconButton>
       </Box>
+      <Box
+        position="absolute"
+        left="calc(100vw - 14px)"
+        width={10}
+        height="calc(100vh - 6px)"
+        sx={{ backgroundColor: "divider" }}
+      />
       <Zoom in={open} unmountOnExit>
         <Box position="relative" top={50}>
           {EDITING_ACTIONS.map(({ name, icon }) => (
