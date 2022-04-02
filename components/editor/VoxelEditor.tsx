@@ -3,9 +3,11 @@ import { Box } from "@mui/material";
 import EditorActions from "components/editor/actions/EditorActions";
 import VoxelWorld from "services/VoxelWord";
 import EditorScene from "./scene/EditorScene";
+import type { EditMode } from "types/editorTypes";
 
 function VoxelEditor(): JSX.Element {
   const [world, setWorld] = useState<VoxelWorld | null>(null);
+  const [mode, setMode] = useState<EditMode>("add");
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -37,9 +39,14 @@ function VoxelEditor(): JSX.Element {
 
   return (
     <Box component="section" position="relative">
-      <EditorScene canvasRef={canvasRef} world={world} />
+      <EditorScene canvasRef={canvasRef} world={world} mode={mode} />
       <Box position="absolute" top={0} left={6}>
-        <EditorActions world={world} handleResetWorld={handleResetWorld} />
+        <EditorActions
+          world={world}
+          mode={mode}
+          setMode={setMode}
+          handleResetWorld={handleResetWorld}
+        />
       </Box>
     </Box>
   );

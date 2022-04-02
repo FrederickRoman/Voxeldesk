@@ -35,7 +35,7 @@ function ResetEditor(props: Props): JSX.Element {
         sx={{
           textAlign: "center",
           color: "palette.text.secondary",
-          width: "100%",
+          width: 200,
           padding: 2,
         }}
       >

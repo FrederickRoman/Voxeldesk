@@ -7,16 +7,20 @@ import {
   RestartAlt,
   Undo,
   Close,
+  Iso,
 } from "@mui/icons-material";
 import ColorPicker from "./color/ColorPicker";
 import Model3dSave from "components/editor/actions/save/Model3dSave";
 import ResetEditor from "./reset/ResetEditor";
-import type { Action, Model3d } from "types/editorTypes";
+import type { Action, EditMode, Model3d } from "types/editorTypes";
 import type VoxelWorld from "services/VoxelWord";
 import type { Color } from "three";
+import EditModeSwitch from "./mode/EditModeSwitch";
 
 interface Props {
   world: VoxelWorld | null;
+  mode: EditMode;
+  setMode: React.Dispatch<React.SetStateAction<EditMode>>;
   handleResetWorld: () => void;
 }
 
@@ -27,6 +31,7 @@ const DEFAULT_COLORS_USED: Color[] = [];
 const DEFAULT_MODEL_3D = Object.freeze({ obj: "", mtl: "" });
 const EDITING_ACTIONS: readonly { icon: JSX.Element; name: Action }[] =
   Object.freeze([
+    { icon: <Iso />, name: "Add/Remove" },
     { icon: <Palette />, name: "Color" },
     { icon: <Undo />, name: "Undo" },
     { icon: <RestartAlt />, name: "Reset" },
@@ -34,7 +39,7 @@ const EDITING_ACTIONS: readonly { icon: JSX.Element; name: Action }[] =
   ]);
 
 function EditorActions(props: Props): JSX.Element {
-  const { world, handleResetWorld } = props;
+  const { world, mode, setMode, handleResetWorld } = props;
   const [open, setOpen] = useState<boolean>(DEFAULT_OPEN);
   const [action, setAction] = useState<Action>(DEFAULT_ACTION);
   const [color, setColor] = useState<string>(DEFAULT_COLOR);
@@ -118,7 +123,9 @@ function EditorActions(props: Props): JSX.Element {
             <Box key={name} onClick={() => handleActionClick(name)}>
               <Grid
                 container
-                justifyContent="center"
+                gridTemplateRows={1}
+                gridTemplateColumns={2}
+                justifyContent="start"
                 alignItems="center"
                 gap={1}
                 my={1}
@@ -173,6 +180,12 @@ function EditorActions(props: Props): JSX.Element {
               defaultModel={DEFAULT_MODEL_3D}
               model3d={model3d}
               handleCloseOption={handleCloseAction}
+            />
+          ) : action == "Add/Remove" ? (
+            <EditModeSwitch
+              mode={mode}
+              setMode={setMode}
+              handleCloseAction={handleCloseAction}
             />
           ) : (
             ""

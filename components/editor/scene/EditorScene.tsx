@@ -3,17 +3,22 @@ import type VoxelWorld from "services/VoxelWord";
 interface Props {
   world: VoxelWorld | null;
   canvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
+  mode: "add" | "remove";
 }
 
 function EditorScene(props: Props): JSX.Element {
-  const { world, canvasRef } = props;
+  const { world, canvasRef, mode } = props;
+
   const handleMouseDown = world?.onMouseDown.bind(world);
   const handleMouseMove = world?.onMouseMove.bind(world);
-  const handleMouseUp = world?.onMouseUp.bind(world);
+  const handleMouseUp = (event: React.MouseEvent) =>
+    world?.onMouseUp.bind(world)(event, mode);
   const handleLeftClick = world?.onRightClick.bind(world);
+  
   const handleTouchStart = world?.onTouchStart.bind(world);
   const handleTouchMove = world?.onTouchMove.bind(world);
-  const handleTouchEnd = world?.onTouchEnd.bind(world);
+  const handleTouchEnd = (event: React.TouchEvent) =>
+    world?.onTouchEnd.bind(world)(event, mode);
 
   return (
     <canvas
@@ -26,7 +31,7 @@ function EditorScene(props: Props): JSX.Element {
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      style={{ touchAction: "pinch-zoom"}}
+      style={{ touchAction: "pinch-zoom" }}
     />
   );
 }
