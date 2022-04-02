@@ -12,7 +12,7 @@ interface Props {
   handleCloseAction: () => void;
 }
 
-function ResetEditor(props: Props): JSX.Element {
+function EditorResetter(props: Props): JSX.Element {
   const { resetWorldScene, handleCloseAction, ...worldState } = props;
   const { defaultColor, setColor, setColorsUsed, defaultModel, setModel3d } =
     worldState;
@@ -82,4 +82,4 @@ function ResetEditor(props: Props): JSX.Element {
   );
 }
 
-export default ResetEditor;
+export default EditorResetter;
