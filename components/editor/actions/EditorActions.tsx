@@ -13,7 +13,7 @@ import ColorPicker from "./color/ColorPicker";
 import Model3dSave from "components/editor/actions/save/Model3dSave";
 import ResetEditor from "./reset/ResetEditor";
 import type { Action, EditMode, Model3d } from "types/editorTypes";
-import type VoxelWorld from "services/VoxelWord";
+import type VoxelWorld from "services/VoxelWorld";
 import type { Color } from "three";
 import EditModeSwitch from "./mode/EditModeSwitch";
 

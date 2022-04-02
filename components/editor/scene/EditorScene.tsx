@@ -1,4 +1,4 @@
-import type VoxelWorld from "services/VoxelWord";
+import type VoxelWorld from "services/VoxelWorld";
 
 interface Props {
   world: VoxelWorld | null;
