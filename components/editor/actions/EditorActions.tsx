@@ -9,9 +9,9 @@ import {
   Close,
   Iso,
 } from "@mui/icons-material";
-import ColorPicker from "./color/ColorPicker";
-import Model3dSave from "components/editor/actions/save/Model3dSave";
-import ResetEditor from "./reset/ResetEditor";
+import VoxelColorPicker from "./color/VoxelColorPicker";
+import ModelSaver from "components/editor/actions/save/ModelSaver";
+import EditorResetter from "./reset/EditorResetter";
 import type { Action, EditMode, Model3d } from "types/editorTypes";
 import type VoxelWorld from "services/VoxelWorld";
 import type { Color } from "three";
@@ -159,14 +159,14 @@ function EditorActions(props: Props): JSX.Element {
       >
         <Box component="section" position="relative" top={50}>
           {action == "Color" ? (
-            <ColorPicker
+            <VoxelColorPicker
               color={color}
               colorsUsed={colorsUsed}
               handleColorChange={handleColorChange}
               handleCloseOption={handleCloseAction}
             />
           ) : action == "Reset" ? (
-            <ResetEditor
+            <EditorResetter
               defaultColor={DEFAULT_COLOR}
               defaultModel={DEFAULT_MODEL_3D}
               setColor={setColor}
@@ -176,7 +176,7 @@ function EditorActions(props: Props): JSX.Element {
               handleCloseAction={handleCloseAction}
             />
           ) : action == "Save" ? (
-            <Model3dSave
+            <ModelSaver
               defaultModel={DEFAULT_MODEL_3D}
               model3d={model3d}
               handleCloseOption={handleCloseAction}
