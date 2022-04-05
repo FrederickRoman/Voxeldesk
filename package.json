@@ -11,6 +11,7 @@
   "dependencies": {
     "event-target-shim": "^6.0.2",
     "next": "12.1.0",
+    "next-pwa": "^5.4.7",
     "react": "17.0.2",
     "react-colorful": "^5.5.1",
     "react-dom": "17.0.2",
