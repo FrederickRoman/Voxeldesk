@@ -190,7 +190,7 @@ class VoxelWorld {
       this.objects.splice(this.objects.indexOf(intersect.object), 1);
     }
   }
-  public onMouseUp(event: React.MouseEvent, mode: EditMode = "add"): void {
+  public onMouseUp(event: React.MouseEvent, mode: EditMode): void {
     event.preventDefault();
     if (event.button !== 0) return;
     const { top, left } = event.currentTarget.getBoundingClientRect();
@@ -214,7 +214,7 @@ class VoxelWorld {
       this.render();
     }
   }
-  public onTouchEnd(event: React.TouchEvent, mode: EditMode = "add"): void {
+  public onTouchEnd(event: React.TouchEvent, mode: EditMode): void {
     console.log("onTouchEnd");
     console.log(event);
     event.preventDefault();
