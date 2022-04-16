@@ -166,6 +166,30 @@ class VoxelWorld {
       this.eventBus.emit("usedColorsChange", payload);
     }
   }
+
+  private addVoxelAt(intersect: Intersection<Object3D<THREE.Event>>): void {
+    if (intersect.face) {
+      const cubeMaterial = this.cubeMaterial.clone();
+      cubeMaterial.color = this.pickedColor;
+      const voxel = new Mesh(this.cubeGeo, cubeMaterial);
+      voxel.position
+        .copy(intersect.point)
+        .add(intersect.face.normal)
+        .divideScalar(50)
+        .floor()
+        .multiplyScalar(50)
+        .addScalar(25);
+      this.scene.add(voxel);
+      this.objects.push(voxel);
+      this.emitWorldChange("usedColors");
+    }
+  }
+  private removeVoxelAt(intersect: Intersection<Object3D<THREE.Event>>): void {
+    if (intersect.object !== this.plane) {
+      this.scene.remove(intersect.object);
+      this.objects.splice(this.objects.indexOf(intersect.object), 1);
+    }
+  }
   public onMouseUp(event: React.MouseEvent, mode: EditMode = "add"): void {
     event.preventDefault();
     if (event.button !== 0) return;
@@ -185,29 +209,8 @@ class VoxelWorld {
     const intersects = this.checkIntersects();
     if (intersects.length > 0) {
       const intersect = intersects[0];
-      if (mode == "remove") {
-        if (intersect.object !== this.plane) {
-          this.scene.remove(intersect.object);
-          this.objects.splice(this.objects.indexOf(intersect.object), 1);
-        }
-      } else {
-        if (intersect.face) {
-          const cubeMaterial = this.cubeMaterial.clone();
-          cubeMaterial.color = this.pickedColor;
-          const voxel = new Mesh(this.cubeGeo, cubeMaterial);
-          voxel.position
-            .copy(intersect.point)
-            .add(intersect.face.normal)
-            .divideScalar(50)
-            .floor()
-            .multiplyScalar(50)
-            .addScalar(25);
-          this.scene.add(voxel);
-          this.objects.push(voxel);
-          this.emitWorldChange("usedColors");
-        }
-      }
-
+      if (mode == "add") this.addVoxelAt(intersect);
+      else if (mode == "remove") this.removeVoxelAt(intersect);
       this.render();
     }
   }
@@ -232,28 +235,8 @@ class VoxelWorld {
     const intersects = this.checkIntersects();
     if (intersects.length > 0) {
       const intersect = intersects[0];
-      if (mode == "remove") {
-        if (intersect.object !== this.plane) {
-          this.scene.remove(intersect.object);
-          this.objects.splice(this.objects.indexOf(intersect.object), 1);
-        }
-      } else {
-        if (intersect.face) {
-          const cubeMaterial = this.cubeMaterial.clone();
-          cubeMaterial.color = this.pickedColor;
-          const voxel = new Mesh(this.cubeGeo, cubeMaterial);
-          voxel.position
-            .copy(intersect.point)
-            .add(intersect.face.normal)
-            .divideScalar(50)
-            .floor()
-            .multiplyScalar(50)
-            .addScalar(25);
-          this.scene.add(voxel);
-          this.objects.push(voxel);
-          this.emitWorldChange("usedColors");
-        }
-      }
+      if (mode == "add") this.addVoxelAt(intersect);
+      else if (mode == "remove") this.removeVoxelAt(intersect);
       this.render();
     }
   }
@@ -270,10 +253,7 @@ class VoxelWorld {
     console.log(intersects);
     if (intersects.length > 0) {
       const intersect = intersects[0];
-      if (intersect.object !== this.plane) {
-        this.scene.remove(intersect.object);
-        this.objects.splice(this.objects.indexOf(intersect.object), 1);
-      }
+      this.removeVoxelAt(intersect);
       this.render();
     }
   }
