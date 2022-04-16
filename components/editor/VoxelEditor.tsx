@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Box } from "@mui/material";
 import EditorActions from "components/editor/actions/EditorActions";
-import VoxelWorld from "services/VoxelWorld";
+import VoxelWorld from "services/world/VoxelWorld";
 import EditorScene from "./scene/EditorScene";
 import type { EditMode } from "types/editorTypes";
 

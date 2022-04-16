@@ -22,7 +22,7 @@ import type {
   Voxel,
   VoxelTopology,
 } from "types/editorTypes";
-import EventBus from "./EventBus";
+import EventBus from "services/bus/EventBus";
 
 class VoxelWorld {
   private camera!: PerspectiveCamera;
