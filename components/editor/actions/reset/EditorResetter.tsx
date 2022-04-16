@@ -1,10 +1,12 @@
 import { Button, ClickAwayListener, Grid, Paper } from "@mui/material";
-import type { Model3d } from "types/editorTypes";
+import type { EditMode, Model3d } from "types/editorTypes";
 import type { Color } from "three";
 
 interface Props {
+  defaultMode: EditMode;
   defaultColor: string;
   defaultModel: Model3d;
+  setMode: React.Dispatch<React.SetStateAction<EditMode>>;
   setColor: React.Dispatch<React.SetStateAction<string>>;
   setColorsUsed: React.Dispatch<React.SetStateAction<Color[]>>;
   setModel3d: React.Dispatch<React.SetStateAction<Model3d>>;
@@ -14,10 +16,18 @@ interface Props {
 
 function EditorResetter(props: Props): JSX.Element {
   const { resetWorldScene, handleCloseAction, ...worldState } = props;
-  const { defaultColor, setColor, setColorsUsed, defaultModel, setModel3d } =
-    worldState;
+  const {
+    defaultMode,
+    defaultColor,
+    setMode,
+    setColor,
+    setColorsUsed,
+    defaultModel,
+    setModel3d,
+  } = worldState;
 
   const resetWorldState = (): void => {
+    setMode(defaultMode)
     setColor(defaultColor);
     setColorsUsed([]);
     setModel3d(defaultModel);

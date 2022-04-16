@@ -6,8 +6,9 @@ import EditorScene from "./scene/EditorScene";
 import type { EditMode } from "types/editorTypes";
 
 function VoxelEditor(): JSX.Element {
+  const DEFAULT_EDIT_MODE = "add";
   const [world, setWorld] = useState<VoxelWorld | null>(null);
-  const [mode, setMode] = useState<EditMode>("add");
+  const [mode, setMode] = useState<EditMode>(DEFAULT_EDIT_MODE);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -43,6 +44,7 @@ function VoxelEditor(): JSX.Element {
       <Box position="absolute" top={0} left={6}>
         <EditorActions
           world={world}
+          defaultMode={DEFAULT_EDIT_MODE}
           mode={mode}
           setMode={setMode}
           handleResetWorld={handleResetWorld}

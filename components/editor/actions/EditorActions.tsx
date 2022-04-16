@@ -19,6 +19,7 @@ import EditModeSwitch from "./mode/EditModeSwitch";
 
 interface Props {
   world: VoxelWorld | null;
+  defaultMode: EditMode;
   mode: EditMode;
   setMode: React.Dispatch<React.SetStateAction<EditMode>>;
   handleResetWorld: () => void;
@@ -39,7 +40,7 @@ const EDITING_ACTIONS: readonly { icon: JSX.Element; name: Action }[] =
   ]);
 
 function EditorActions(props: Props): JSX.Element {
-  const { world, mode, setMode, handleResetWorld } = props;
+  const { world, defaultMode, mode, setMode, handleResetWorld } = props;
   const [open, setOpen] = useState<boolean>(DEFAULT_OPEN);
   const [action, setAction] = useState<Action>(DEFAULT_ACTION);
   const [color, setColor] = useState<string>(DEFAULT_COLOR);
@@ -167,8 +168,10 @@ function EditorActions(props: Props): JSX.Element {
             />
           ) : action == "Reset" ? (
             <EditorResetter
+              defaultMode={defaultMode}
               defaultColor={DEFAULT_COLOR}
               defaultModel={DEFAULT_MODEL_3D}
+              setMode={setMode}
               setColor={setColor}
               setColorsUsed={setColorsUsed}
               setModel3d={setModel3d}
