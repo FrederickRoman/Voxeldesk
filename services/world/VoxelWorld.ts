@@ -24,6 +24,18 @@ import type {
 } from "types/editorTypes";
 import EventBus from "services/bus/EventBus";
 
+namespace Edit {
+  interface Step {
+    action: "addition" | "removal";
+    object: {
+      type: "voxel";
+      position: THREE.Vector3;
+      color: THREE.Color;
+    };
+  }
+  export type History = Step[];
+}
+
 class VoxelWorld {
   private camera!: PerspectiveCamera;
   private scene!: Scene;
@@ -43,6 +55,7 @@ class VoxelWorld {
   private usedColors: Color[] = [];
   private readonly cubeGeo = new BoxGeometry(50, 50, 50);
   private cubeMaterial = new MeshLambertMaterial({ color: 0xfeb74c });
+  private history: Edit.History = [];
   public eventBus = new EventBus();
   constructor(canvas: HTMLCanvasElement) {
     this.camera = this.createCamera();
@@ -181,13 +194,34 @@ class VoxelWorld {
         .addScalar(25);
       this.scene.add(voxel);
       this.objects.push(voxel);
+      this.history.push({
+        action: "addition",
+        object: {
+          type: "voxel",
+          position: voxel.position,
+          color: voxel.material.color,
+        },
+      });
+      console.log(this.history);
       this.emitWorldChange("usedColors");
     }
   }
   private removeVoxelAt(intersect: Intersection<Object3D<THREE.Event>>): void {
     if (intersect.object !== this.plane) {
-      this.scene.remove(intersect.object);
-      this.objects.splice(this.objects.indexOf(intersect.object), 1);
+      const object = this.objects.find((obj) => obj == intersect.object);
+      if (object && this.isVoxel(object)) {
+        this.scene.remove(intersect.object);
+        this.objects.splice(this.objects.indexOf(intersect.object), 1);
+        this.history.push({
+          action: "removal",
+          object: {
+            type: "voxel",
+            position: intersect.object.position,
+            color: (object as Voxel).material.color,
+          },
+        });
+        console.log(this.history);
+      }
     }
   }
   public onMouseUp(event: React.MouseEvent, mode: EditMode): void {
@@ -258,12 +292,33 @@ class VoxelWorld {
     }
   }
   public onUndo(): void {
-    const lastObjectAdded = this.objects.slice(0 - 1)[0];
-    if (this.isVoxel(lastObjectAdded)) {
-      this.scene.remove(lastObjectAdded);
-      this.objects.pop();
+    if (this.history.length > 0) {
+      const lastStep = this.history.pop();
+      if (lastStep) {
+        if (lastStep.action == "addition") {
+          if (lastStep.object.type == "voxel") {
+            const voxel = this.objects.find(
+              (worldObject) =>
+                this.isVoxel(worldObject) &&
+                worldObject.position.equals(lastStep.object.position)
+            ) as Voxel;
+            if (voxel) {
+              this.scene.remove(voxel);
+              this.objects.splice(this.objects.indexOf(voxel), 1);
+            }
+          }
+        } else if (lastStep.action == "removal") {
+          if (lastStep.object.type == "voxel") {
+            const cubeMaterial = this.cubeMaterial.clone();
+            cubeMaterial.color = lastStep.object.color;
+            const voxel: Voxel = new Mesh(this.cubeGeo, cubeMaterial);
+            voxel.position.copy(lastStep.object.position);
+            this.scene.add(voxel);
+            this.objects.push(voxel);
+          }
+        }
+      }
     }
-
     this.render();
   }
   private topologizeVoxel(voxel: Voxel, id: number): VoxelTopology {
