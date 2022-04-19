@@ -357,34 +357,30 @@ class VoxelWorld {
   }
   public onSave(): Model3d {
     const NUM_CUBE_VERTICES = 8;
-    const mtlSet = new Set<Color>();
-    let objString = "";
-    let mtlString = "";
+    const mtlColorSet = new Set<Color>();
+    const model3d = Object.seal({ obj: "", mtl: "" });
     this.objects
       .filter((object) => this.isVoxel(object))
       .map((voxel): Voxel => voxel as Voxel)
       .map((voxel, i) => this.topologizeVoxel(voxel, NUM_CUBE_VERTICES * i))
       .forEach(({ vertices, faces, color }) => {
         const colorName = color.getHex().toString(16);
-        if (!mtlSet.has(color)) {
-          mtlString += `newmtl ${colorName}\n`;
-          mtlString += `Kd ${color.r} ${color.g} ${color.b}\n\n`;
-          mtlSet.add(color);
+        if (!mtlColorSet.has(color)) {
+          model3d.mtl += `newmtl ${colorName}\n`;
+          model3d.mtl += `Kd ${color.r} ${color.g} ${color.b}\n\n`;
+          mtlColorSet.add(color);
         }
-        objString += `usemtl ${colorName}\n`;
+        model3d.obj += `usemtl ${colorName}\n`;
         vertices.forEach((vertex) => {
-          objString += `v ${vertex.x} ${vertex.y} ${vertex.z}\n`;
+          model3d.obj += `v ${vertex.x} ${vertex.y} ${vertex.z}\n`;
         });
         faces.forEach((face) => {
-          objString += `f ${face.join(" ")}\n`;
+          model3d.obj += `f ${face.join(" ")}\n`;
         });
       });
-    if (mtlString.length > 0) {
-      objString = "mtllib ./material.mtl\n" + objString;
-    }
-    console.log(objString);
-    console.log(mtlString);
-    return { obj: objString, mtl: mtlString };
+    if (model3d.mtl.length > 0)
+      model3d.obj = "mtllib ./material.mtl\n" + model3d.obj;
+    return model3d;
   }
   private orbit(theta: number, phi: number): void {
     const RADIUS = 1600;
