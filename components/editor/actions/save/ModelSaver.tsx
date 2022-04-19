@@ -1,4 +1,12 @@
-import { ClickAwayListener, Grid, Paper, TextField } from "@mui/material";
+import {
+  ClickAwayListener,
+  Grid,
+  Paper,
+  Box,
+  IconButton,
+  TextField,
+} from "@mui/material";
+import { Close } from "@mui/icons-material";
 import type { Model3d } from "types/editorTypes";
 
 interface Props {
@@ -9,14 +17,16 @@ interface Props {
 
 function Model3dSave(props: Props): JSX.Element {
   const { defaultModel, model3d, handleCloseOption } = props;
-  const isModel3dDefault =
+  const isModel3dEmpty =
     model3d.obj == defaultModel.obj && model3d.mtl == defaultModel.mtl;
   const handleClickAway = handleCloseOption;
 
   return (
     <ClickAwayListener onClickAway={handleClickAway}>
-      <Paper
+      <Box
+        component={Paper}
         elevation={3}
+        position="relative"
         sx={{
           textAlign: "center",
           color: "palette.text.secondary",
@@ -24,33 +34,59 @@ function Model3dSave(props: Props): JSX.Element {
           padding: 2,
         }}
       >
-        {isModel3dDefault ? (
-          <div>There is nothing to save</div>
+        <Box position="absolute" top={3} right={3}>
+          <IconButton
+            aria-label="close"
+            size="small"
+            sx={{
+              color: "primary.light",
+              "&:hover": { color: "primary.main" },
+            }}
+            onClick={handleCloseOption}
+          >
+            <Close />
+          </IconButton>
+        </Box>
+
+        {isModel3dEmpty ? (
+          <h3>There is nothing to save</h3>
         ) : (
-          <Grid container justifyContent="center" alignItems="center">
+          <Grid
+            container
+            flexDirection="column"
+            justifyContent="center"
+            alignItems="center"
+          >
             <Grid item>
-              <TextField
-                id="model3d-obj_text-field"
-                label=".obj"
-                multiline
-                rows={10}
-                value={model3d.obj}
-                variant="outlined"
-              />
+              <h3>Saved model</h3>
             </Grid>
             <Grid item>
-              <TextField
-                id="model3d-mtl_text-field"
-                label=".mtl"
-                multiline
-                rows={10}
-                value={model3d.mtl}
-                variant="outlined"
-              />
+              <Grid container justifyContent="center" alignItems="center">
+                <Grid item>
+                  <TextField
+                    id="model3d-obj_text-field"
+                    label=".obj"
+                    multiline
+                    rows={10}
+                    value={model3d.obj}
+                    variant="outlined"
+                  />
+                </Grid>
+                <Grid item>
+                  <TextField
+                    id="model3d-mtl_text-field"
+                    label=".mtl"
+                    multiline
+                    rows={10}
+                    value={model3d.mtl}
+                    variant="outlined"
+                  />
+                </Grid>
+              </Grid>
             </Grid>
           </Grid>
         )}
-      </Paper>
+      </Box>
     </ClickAwayListener>
   );
 }
