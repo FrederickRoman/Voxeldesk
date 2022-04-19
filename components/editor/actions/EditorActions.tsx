@@ -8,10 +8,12 @@ import {
   Undo,
   Close,
   Iso,
+  DownloadForOffline,
 } from "@mui/icons-material";
 import VoxelColorPicker from "./color/VoxelColorPicker";
-import ModelSaver from "components/editor/actions/save/ModelSaver";
 import EditorResetter from "./reset/EditorResetter";
+import ModelSaver from "./save/ModelSaver";
+import ModelLoader from "./load/ModelLoader";
 import type { Action, EditMode, Model3d } from "types/editorTypes";
 import type VoxelWorld from "services/world/VoxelWorld";
 import type { Color } from "three";
@@ -37,6 +39,7 @@ const EDITING_ACTIONS: readonly { icon: JSX.Element; name: Action }[] =
     { icon: <Undo />, name: "Undo" },
     { icon: <RestartAlt />, name: "Reset" },
     { icon: <Save />, name: "Save" },
+    { icon: <DownloadForOffline />, name: "Load" },
   ]);
 
 function EditorActions(props: Props): JSX.Element {
@@ -159,7 +162,13 @@ function EditorActions(props: Props): JSX.Element {
         unmountOnExit
       >
         <Box component="section" position="relative" top={50}>
-          {action == "Color" ? (
+          {action == "Add/Remove" ? (
+            <EditModeSwitch
+              mode={mode}
+              setMode={setMode}
+              handleCloseAction={handleCloseAction}
+            />
+          ) : action == "Color" ? (
             <VoxelColorPicker
               color={color}
               colorsUsed={colorsUsed}
@@ -184,11 +193,10 @@ function EditorActions(props: Props): JSX.Element {
               model3d={model3d}
               handleCloseOption={handleCloseAction}
             />
-          ) : action == "Add/Remove" ? (
-            <EditModeSwitch
-              mode={mode}
-              setMode={setMode}
-              handleCloseAction={handleCloseAction}
+          ) : action == "Load" ? (
+            <ModelLoader
+              defaultModel={DEFAULT_MODEL_3D}
+              handleCloseOption={handleCloseAction}
             />
           ) : (
             ""
