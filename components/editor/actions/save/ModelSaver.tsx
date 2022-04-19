@@ -15,7 +15,7 @@ interface Props {
   handleCloseOption: () => void;
 }
 
-function Model3dSave(props: Props): JSX.Element {
+function ModelSaver(props: Props): JSX.Element {
   const { defaultModel, model3d, handleCloseOption } = props;
   const isModel3dEmpty =
     model3d.obj == defaultModel.obj && model3d.mtl == defaultModel.mtl;
@@ -91,4 +91,4 @@ function Model3dSave(props: Props): JSX.Element {
   );
 }
 
-export default Model3dSave;
+export default ModelSaver;
