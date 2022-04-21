@@ -2,6 +2,7 @@ import {
   AmbientLight,
   BoxGeometry,
   Color,
+  ColorRepresentation,
   DirectionalLight,
   GridHelper,
   Intersection,
@@ -14,6 +15,7 @@ import {
   Raycaster,
   Scene,
   Vector2,
+  Vector3,
   WebGLRenderer,
 } from "three";
 import type {
@@ -53,7 +55,9 @@ class VoxelWorld {
   private plane!: Mesh;
   private pickedColor = new Color(0xfeb74c);
   private usedColors: Color[] = [];
-  private readonly cubeGeo = new BoxGeometry(50, 50, 50);
+  private readonly CUBE_LEN = 50;
+  private readonly cubeDims: number[] = new Array(3).fill(this.CUBE_LEN);
+  private readonly cubeGeo = new BoxGeometry(...this.cubeDims);
   private cubeMaterial = new MeshLambertMaterial({ color: 0xfeb74c });
   private history: Edit.History = [];
   public eventBus = new EventBus();
@@ -307,19 +311,24 @@ class VoxelWorld {
               this.objects.splice(this.objects.indexOf(voxel), 1);
             }
           }
-        } else if (lastStep.action == "removal") {
-          if (lastStep.object.type == "voxel") {
-            const cubeMaterial = this.cubeMaterial.clone();
-            cubeMaterial.color = lastStep.object.color;
-            const voxel: Voxel = new Mesh(this.cubeGeo, cubeMaterial);
-            voxel.position.copy(lastStep.object.position);
-            this.scene.add(voxel);
-            this.objects.push(voxel);
-          }
+        } else if (
+          lastStep.action == "removal" &&
+          lastStep.object.type == "voxel"
+        ) {
+          const { color, position } = lastStep.object;
+          this.addVoxel(color, position);
         }
       }
     }
     this.render();
+  }
+  private addVoxel(color: Color, position: Vector3): void {
+    const cubeMaterial = this.cubeMaterial.clone();
+    cubeMaterial.color = color;
+    const voxel: Voxel = new Mesh(this.cubeGeo, cubeMaterial);
+    voxel.position.copy(position);
+    this.scene.add(voxel);
+    this.objects.push(voxel);
   }
   private topologizeVoxel(voxel: Voxel, id: number): VoxelTopology {
     const OFFSET = 25;
@@ -381,6 +390,28 @@ class VoxelWorld {
     if (model3d.mtl.length > 0)
       model3d.obj = "mtllib ./material.mtl\n" + model3d.obj;
     return model3d;
+  }
+  public onLoadModel(model3d: Model3d): void {
+    try {
+      const VOXEL_NUM_LINES = 15;
+      const OFFSET = this.CUBE_LEN / 2;
+      const offsetVector = new Vector3(OFFSET, OFFSET, -OFFSET);
+      const objLines = model3d.obj.trim().split(/\r?\n/).slice(1);
+      const voxelsData: { color: Color; position: Vector3 }[] = [];
+      for (let i = 0; i < objLines.length / VOXEL_NUM_LINES; i++) {
+        const colorLine = objLines[i * VOXEL_NUM_LINES].split(/\s/);
+        const vertexLine = objLines[i * VOXEL_NUM_LINES + 1].split(/\s/);
+        const color = new Color(`#${colorLine[1]}` as ColorRepresentation);
+        const [x, y, z] = vertexLine.slice(1).map((v) => Number(v));
+        const position = new Vector3(x, y, z).add(offsetVector);
+        voxelsData.push({ color, position });
+      }
+      voxelsData.forEach(({ color, position }) =>
+        this.addVoxel(color, position)
+      );
+    } catch (error) {
+      console.log(error);
+    }
   }
   private orbit(theta: number, phi: number): void {
     const RADIUS = 1600;
