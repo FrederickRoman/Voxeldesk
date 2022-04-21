@@ -21,3 +21,15 @@ export interface Model3d {
   obj: string;
   mtl: string;
 }
+
+export namespace Edit {
+  interface Step {
+    action: "addition" | "removal";
+    object: {
+      type: "voxel";
+      position: THREE.Vector3;
+      color: THREE.Color;
+    };
+  }
+  export type History = Step[];
+}

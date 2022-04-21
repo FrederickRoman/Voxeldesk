@@ -19,24 +19,13 @@ import {
   WebGLRenderer,
 } from "three";
 import type {
+  Edit,
   EditMode,
   Model3d,
   Voxel,
   VoxelTopology,
 } from "types/editorTypes";
 import EventBus from "services/bus/EventBus";
-
-namespace Edit {
-  interface Step {
-    action: "addition" | "removal";
-    object: {
-      type: "voxel";
-      position: THREE.Vector3;
-      color: THREE.Color;
-    };
-  }
-  export type History = Step[];
-}
 
 class VoxelWorld {
   private camera!: PerspectiveCamera;
