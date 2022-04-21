@@ -12,10 +12,11 @@ function isHexColorString(str: string): boolean {
 }
 
 function isVertexLineValid(vertexLine: string[]): boolean {
+  const isStringNumber = (string: string): boolean => !isNaN(Number(string));
   return (
     vertexLine.length == 4 &&
-    vertexLine.every((v) => v != "") &&
-    vertexLine[0] == "v"
+    vertexLine[0] == "v" &&
+    vertexLine.slice(1).every((coordinate) => isStringNumber(coordinate))
   );
 }
 
@@ -30,38 +31,49 @@ function isCoordinateWithinLimits(coordVal: number): boolean {
 
 class ModelValidator {
   static validate(model3d: Model3d): Validation {
-    const VOXEL_NUM_LINES = 15;
-    const COORD_NAMES = Object.freeze(["x", "y", "z"]);
+    try {
+      const VOXEL_NUM_LINES = 15;
+      const COORD_NAMES = Object.freeze(["x", "y", "z"]);
 
-    if (model3d.obj == "")
-      return { err: true, msg: "Cannot load empty .obj file!" };
+      if (model3d.obj == "")
+        return { err: true, msg: "Cannot load empty .obj file!" };
 
-    const objLines = model3d.obj.trim().split(/\r?\n/).slice(1);
-    for (let i = 0; i < objLines.length / VOXEL_NUM_LINES; i++) {
-      const colorLine = objLines[i * VOXEL_NUM_LINES].split(/\s/);
-      const vertexLine = objLines[i * VOXEL_NUM_LINES + 1].split(/\s/);
-      if (!isMtlColorLineValid(colorLine))
-        return { err: true, msg: `Invalid color line ${colorLine}` };
-      if (!isHexColorString(colorLine[1]))
-        return { err: true, msg: `Invalid hex value ${colorLine[1]}` };
-      if (!isVertexLineValid(vertexLine))
-        return { err: true, msg: `Line ${vertexLine} has invalid format` };
-      if (!isVertexLineValid(vertexLine))
-        return { err: true, msg: `Invalid vertex ${vertexLine}` };
-      vertexLine.forEach((coordVal, i) => {
-        if (i != 0) {
-          if (!isCoordinateWithinLimits(parseInt(coordVal))) {
-            const coordName = COORD_NAMES[i - 1];
-            return {
-              err: true,
-              msg: `Vertex ${coordName} value exceeds allowed dimensions ${coordVal}`,
-            };
+      const objLines = model3d.obj.trim().split(/\r?\n/).slice(1);
+      if (objLines.length % VOXEL_NUM_LINES != 0)
+        return {
+          err: true,
+          msg:
+            `${objLines.length} is an invalid number of lines in .obj file! ` +
+            `They must be a (multiple of ${VOXEL_NUM_LINES}) + 1`,
+        };
+
+      for (let i = 0; i < objLines.length / VOXEL_NUM_LINES; i++) {
+        const colorLine = objLines[i * VOXEL_NUM_LINES].split(/\s/);
+        const vertexLine = objLines[i * VOXEL_NUM_LINES + 1].split(/\s/);
+        if (!isMtlColorLineValid(colorLine))
+          return { err: true, msg: `Invalid color line ${colorLine}` };
+        if (!isHexColorString(colorLine[1]))
+          return { err: true, msg: `Invalid hex value ${colorLine[1]}` };
+        if (!isVertexLineValid(vertexLine))
+          return { err: true, msg: `Line ${vertexLine} has invalid format` };
+        if (!isVertexLineValid(vertexLine))
+          return { err: true, msg: `Invalid vertex ${vertexLine}` };
+        vertexLine.forEach((coordVal, i) => {
+          if (i != 0) {
+            if (!isCoordinateWithinLimits(parseInt(coordVal))) {
+              const coordName = COORD_NAMES[i - 1];
+              return {
+                err: true,
+                msg: `Vertex ${coordName} value exceeds allowed dimensions ${coordVal}`,
+              };
+            }
           }
-        }
-      });
+        });
+      }
+      return { err: false, msg: "" };
+    } catch (error) {
+      return { err: true, msg: "Invalid model" };
     }
-
-    return { err: false, msg: "" };
   }
 }
 
