@@ -9,6 +9,7 @@ import {
   Button,
 } from "@mui/material";
 import { Close } from "@mui/icons-material";
+import ModelValidator from "services/world/validator/ModelValidator";
 import type { Model3d } from "types/editorTypes";
 
 type HandleChangeModelToLoad = (
@@ -17,22 +18,33 @@ type HandleChangeModelToLoad = (
 
 interface Props {
   defaultModel: Model3d;
+  setLoadedModel: React.Dispatch<React.SetStateAction<Model3d>>;
+  handleLoadModel: () => void;
   handleCloseOption: () => void;
 }
 
 function ModelLoader(props: Props): JSX.Element {
-  const { defaultModel, handleCloseOption } = props;
+  const { defaultModel, setLoadedModel, handleLoadModel, handleCloseOption } =
+    props;
   const handleClickAway = handleCloseOption;
-  const [loadedModel, setLoadedModel] = useState<Model3d>(defaultModel);
+  const [validationError, setValidationError] = useState<boolean>(false);
+  const [validaitonMsg, setValidationMsg] = useState<string>("");
 
-  const handleChangeModelToLoad: HandleChangeModelToLoad = (event) =>
-    setLoadedModel({
+  const handleChangeModelToLoad: HandleChangeModelToLoad = (event) => {
+    const model = {
       obj: event.target.value,
       mtl: defaultModel.mtl,
-    });
-
-  const handleLoadModel = (): void => {
-    /** @todo load model to world */
+    };
+    const { err, msg } = ModelValidator.validate(model);
+    if (err) {
+      console.log(err);
+      setValidationError(true);
+      setValidationMsg(msg);
+    } else {
+      setValidationError(false);
+      setValidationMsg("");
+      setLoadedModel(model);
+    }
   };
 
   return (
@@ -81,6 +93,8 @@ function ModelLoader(props: Props): JSX.Element {
                   rows={10}
                   variant="outlined"
                   defaultValue={defaultModel.obj}
+                  error={validationError}
+                  helperText={validaitonMsg}
                   onChange={handleChangeModelToLoad}
                 />
               </Grid>
@@ -88,6 +102,7 @@ function ModelLoader(props: Props): JSX.Element {
                 <Button
                   size="small"
                   variant="outlined"
+                  disabled={validationError}
                   onClick={handleLoadModel}
                 >
                   Load

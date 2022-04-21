@@ -49,6 +49,7 @@ function EditorActions(props: Props): JSX.Element {
   const [color, setColor] = useState<string>(DEFAULT_COLOR);
   const [colorsUsed, setColorsUsed] = useState<Color[]>(DEFAULT_COLORS_USED);
   const [model3d, setModel3d] = useState<Model3d>(DEFAULT_MODEL_3D);
+  const [loadedModel, setLoadedModel] = useState<Model3d>(DEFAULT_MODEL_3D);
 
   useEffect(() => {
     function keepUsedColors(event: Event): void {
@@ -94,6 +95,9 @@ function EditorActions(props: Props): JSX.Element {
       handleOpenAction(name);
     }
   };
+
+  const handleLoadModel = (): void =>
+    world?.onLoadModel.call(world, loadedModel);
 
   return (
     <Box component="section" height={256} mt={1}>
@@ -196,6 +200,8 @@ function EditorActions(props: Props): JSX.Element {
           ) : action == "Load" ? (
             <ModelLoader
               defaultModel={DEFAULT_MODEL_3D}
+              setLoadedModel={setLoadedModel}
+              handleLoadModel={handleLoadModel}
               handleCloseOption={handleCloseAction}
             />
           ) : (
