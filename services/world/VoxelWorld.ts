@@ -298,26 +298,10 @@ class VoxelWorld {
   public onUndo(): void {
     if (this.history.length > 0) {
       const lastStep = this.history.pop();
-      if (lastStep) {
-        if (lastStep.action == "addition") {
-          if (lastStep.object.type == "voxel") {
-            const voxel = this.objects.find(
-              (worldObject) =>
-                this.isVoxel(worldObject) &&
-                worldObject.position.equals(lastStep.object.position)
-            ) as Voxel;
-            if (voxel) {
-              this.scene.remove(voxel);
-              this.objects.splice(this.objects.indexOf(voxel), 1);
-            }
-          }
-        } else if (
-          lastStep.action == "removal" &&
-          lastStep.object.type == "voxel"
-        ) {
-          const { color, position } = lastStep.object;
-          this.addVoxel(color, position);
-        }
+      if (lastStep && lastStep.object.type == "voxel") {
+        const { color, position } = lastStep.object;
+        if (lastStep.action == "addition") this.removeVoxelByPosition(position);
+        else if (lastStep.action == "removal") this.addVoxel(color, position);
       }
     }
     this.render();
@@ -329,6 +313,15 @@ class VoxelWorld {
     voxel.position.copy(position);
     this.scene.add(voxel);
     this.objects.push(voxel);
+  }
+  private removeVoxelByPosition(position: Vector3): void {
+    const voxel = this.objects.find(
+      (object) => this.isVoxel(object) && object.position.equals(position)
+    );
+    if (voxel) {
+      this.scene.remove(voxel);
+      this.objects.splice(this.objects.indexOf(voxel), 1);
+    }
   }
   private topologizeVoxel(voxel: Voxel, id: number): VoxelTopology {
     const OFFSET = 25;
