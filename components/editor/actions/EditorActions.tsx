@@ -18,6 +18,7 @@ import type { Action, EditMode, Model3d } from "types/editorTypes";
 import type VoxelWorld from "services/world/VoxelWorld";
 import type { Color } from "three";
 import EditModeSwitch from "./mode/EditModeSwitch";
+import { useErrorHandler } from "react-error-boundary";
 
 interface Props {
   world: VoxelWorld | null;
@@ -50,6 +51,7 @@ function EditorActions(props: Props): JSX.Element {
   const [colorsUsed, setColorsUsed] = useState<Color[]>(DEFAULT_COLORS_USED);
   const [model3d, setModel3d] = useState<Model3d>(DEFAULT_MODEL_3D);
   const [loadedModel, setLoadedModel] = useState<Model3d>(DEFAULT_MODEL_3D);
+  const handleError = useErrorHandler();
 
   useEffect(() => {
     function keepUsedColors(event: Event): void {
@@ -96,8 +98,14 @@ function EditorActions(props: Props): JSX.Element {
     }
   };
 
-  const handleLoadModel = (): void =>
-    world?.onLoadModel.call(world, loadedModel);
+  const handleLoadModel = (): void => {
+    try {
+      world?.onLoadModel.call(world, loadedModel);
+      handleCloseAction()
+    } catch (error) {
+      handleError(error);
+    }
+  };
 
   return (
     <Box component="section" height={256} mt={1}>
