@@ -1,6 +1,7 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import VoxelEditor from "components/editor/VoxelEditor";
+import { ErrorBoundary } from "react-error-boundary";
 
 const PageHead = (): JSX.Element => (
   <Head>
@@ -20,7 +21,11 @@ const PageHead = (): JSX.Element => (
 const Home: NextPage = () => (
   <>
     <PageHead />
-    <VoxelEditor />
+    <ErrorBoundary
+      FallbackComponent={() => <div> Oops! Something went wrong</div>}
+    >
+      <VoxelEditor />
+    </ErrorBoundary>
   </>
 );
 
