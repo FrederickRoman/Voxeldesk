@@ -297,9 +297,11 @@ class VoxelWorld {
         const position = new Vector3(x, y, z).add(offsetVector);
         voxelsData.push({ color, position });
       }
-      voxelsData.forEach(({ color, position }) =>
-        this.addVoxel(color, position)
-      );
+      voxelsData.forEach(({ color, position }) => {
+        this.addVoxel(color, position);
+        this.setPickedColor(color);
+        this.emitWorldChange("usedColors")
+      });
     } catch (error) {
       console.log(error);
     }
