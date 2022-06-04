@@ -7,7 +7,7 @@ import {
   Toolbar,
   Typography,
 } from "@mui/material";
-import HelpIcon from "@mui/icons-material/Help";
+import InfoIcon from "@mui/icons-material/Info";
 import Image from "next/image";
 
 function HomeLink(): JSX.Element {
@@ -15,11 +15,21 @@ function HomeLink(): JSX.Element {
     <Box>
       <Button>
         <Grid container justifyContent="center" alignItems="center">
-          <Grid item sx={{ display: "grid", placeContent:"center", mx:1}}>
-            <Image src="/img/voxeldesk_logo.png" width={30} height={30}/>
+          <Grid item sx={{ display: "grid", placeContent: "center", mx: 1 }}>
+            <Box pt={2}>
+              <Image
+                src="/img/voxeldesk_logo.svg"
+                width={50}
+                height={50}
+                alt="Voxeldesk logo"
+              />
+            </Box>
           </Grid>
           <Grid item>
-            <Typography variant="h6" sx={{ color: "background.default" }}>
+            <Typography
+              variant="h6"
+              sx={{ color: "background.default", textTransform: "none" }}
+            >
               Voxeldesk
             </Typography>
           </Grid>
@@ -33,7 +43,7 @@ function AboutLink(): JSX.Element {
   return (
     <Box>
       <IconButton size="large" aria-label="about">
-        <HelpIcon sx={{ color: "background.default" }} />
+        <InfoIcon sx={{ color: "background.default" }} />
       </IconButton>
     </Box>
   );
