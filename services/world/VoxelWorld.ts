@@ -241,6 +241,20 @@ class VoxelWorld {
     }
     this.render();
   }
+  private zeroPadHexString(hex: string): string {
+    const STD_HEX_LENGTH = 6;
+    const hexLength = hex.length;
+    if (hexLength > STD_HEX_LENGTH) {
+      console.log(`hex color was cut to be ${STD_HEX_LENGTH} of length`);
+      return hex.slice(0, STD_HEX_LENGTH);
+    } else if (hexLength == STD_HEX_LENGTH) {
+      return hex;
+    } else {
+      const zerosLength = STD_HEX_LENGTH - hexLength;
+      const zeros = Array(zerosLength).fill("0").join("");
+      return `${zeros}${hex}`;
+    }
+  }
   public onSave(): Model3d {
     const NUM_CUBE_VERTICES = 8;
     const mtlColorSet = new Set<Color>();
@@ -250,7 +264,7 @@ class VoxelWorld {
       .map((voxel): Voxel => voxel as Voxel)
       .map((voxel, i) => this.topologizeVoxel(voxel, NUM_CUBE_VERTICES * i))
       .forEach(({ vertices, faces, color }) => {
-        const colorName = color.getHex().toString(16);
+        const colorName = this.zeroPadHexString(color.getHex().toString(16));
         if (!mtlColorSet.has(color)) {
           model3d.mtl += `newmtl ${colorName}\n`;
           model3d.mtl += `Kd ${color.r} ${color.g} ${color.b}\n\n`;
