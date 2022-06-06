@@ -1,8 +1,17 @@
-import type { NextPage } from "next";
+import dynamic from "next/dynamic";
 import Head from "next/head";
-import VoxelEditor from "components/editor/VoxelEditor";
 import { ErrorBoundary } from "react-error-boundary";
 import HeroBanner from "components/banner/HeroBanner";
+import type { NextPage } from "next";
+
+/**
+ * To avoid "Build failed because of webpack errors" caused by
+ * "HookWebpackError: EMFILE: too many open files",
+ * import dynamically VoxelEditor component and disable SSR.
+ */
+const VoxelEditor = dynamic(() => import("components/editor/VoxelEditor"), {
+  ssr: false,
+});
 
 const PageHead = (): JSX.Element => (
   <Head>
