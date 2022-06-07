@@ -13,7 +13,7 @@ function EditorScene(props: Props): JSX.Element {
   const handleMouseMove = world?.onMouseMove.bind(world);
   const handleMouseUp = (event: React.MouseEvent) =>
     world?.onMouseUp.bind(world)(event, mode);
-  const handleLeftClick = world?.onRightClick.bind(world);
+  const handleRightClick = world?.onRightClick.bind(world);
   
   const handleTouchStart = world?.onTouchStart.bind(world);
   const handleTouchMove = world?.onTouchMove.bind(world);
@@ -27,7 +27,7 @@ function EditorScene(props: Props): JSX.Element {
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseOut={handleMouseUp}
-      onContextMenu={handleLeftClick}
+      onContextMenu={handleRightClick}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
