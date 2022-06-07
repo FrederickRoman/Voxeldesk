@@ -2,16 +2,8 @@ import dynamic from "next/dynamic";
 import Head from "next/head";
 import { ErrorBoundary } from "react-error-boundary";
 import HeroBanner from "components/banner/HeroBanner";
+import { Skeleton } from "@mui/material";
 import type { NextPage } from "next";
-
-/**
- * To avoid "Build failed because of webpack errors" caused by
- * "HookWebpackError: EMFILE: too many open files",
- * import dynamically VoxelEditor component and disable SSR.
- */
-const VoxelEditor = dynamic(() => import("components/editor/VoxelEditor"), {
-  ssr: false,
-});
 
 const PageHead = (): JSX.Element => (
   <Head>
@@ -27,6 +19,20 @@ const PageHead = (): JSX.Element => (
     />
   </Head>
 );
+
+/**
+ * To avoid "Build failed because of webpack errors" caused by
+ * "HookWebpackError: EMFILE: too many open files",
+ * import dynamically VoxelEditor component and disable SSR.
+ */
+const VoxelEditor = dynamic(() => import("components/editor/VoxelEditor"), {
+  ssr: false,
+  loading: () => (
+    <Skeleton variant="rectangular" animation="wave" width="98vw" height="90vh">
+      <canvas width="100vw" height="100vh" />
+    </Skeleton>
+  ),
+});
 
 const Home: NextPage = () => (
   <>
