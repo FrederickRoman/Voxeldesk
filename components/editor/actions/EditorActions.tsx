@@ -21,6 +21,7 @@ import EditModeSwitch from "./mode/EditModeSwitch";
 import { useErrorHandler } from "react-error-boundary";
 
 interface Props {
+  canvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
   world: VoxelWorld | null;
   defaultMode: EditMode;
   mode: EditMode;
@@ -44,7 +45,8 @@ const EDITING_ACTIONS: readonly { icon: JSX.Element; name: Action }[] =
   ]);
 
 function EditorActions(props: Props): JSX.Element {
-  const { world, defaultMode, mode, setMode, handleResetWorld } = props;
+  const { canvasRef, world, defaultMode, mode, setMode, handleResetWorld } =
+    props;
   const [open, setOpen] = useState<boolean>(DEFAULT_OPEN);
   const [action, setAction] = useState<Action>(DEFAULT_ACTION);
   const [color, setColor] = useState<string>(DEFAULT_COLOR);
@@ -101,7 +103,16 @@ function EditorActions(props: Props): JSX.Element {
   const handleLoadModel = (): void => {
     try {
       world?.onLoadModel.call(world, loadedModel);
-      handleCloseAction()
+      handleCloseAction();
+      // The model render on canvas only after an interaction (e.g. mousemove).
+      // So to force an immediate render, distpatch a mousemove event.
+      const eventOptions = {
+        view: window,
+        bubbles: true,
+        cancelable: true,
+      };
+      const triggerRenderEvent = new MouseEvent("mousemove", eventOptions);
+      canvasRef.current?.dispatchEvent(triggerRenderEvent);
     } catch (error) {
       handleError(error);
     }

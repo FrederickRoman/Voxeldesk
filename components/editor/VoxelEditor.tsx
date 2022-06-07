@@ -43,6 +43,7 @@ function VoxelEditor(): JSX.Element {
       <EditorScene canvasRef={canvasRef} world={world} mode={mode} />
       <Box position="absolute" top={0} left={6}>
         <EditorActions
+          canvasRef={canvasRef}
           world={world}
           defaultMode={DEFAULT_EDIT_MODE}
           mode={mode}
