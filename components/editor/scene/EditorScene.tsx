@@ -1,9 +1,10 @@
 import type VoxelWorld from "services/world/VoxelWorld";
+import type { EditMode } from "types/editorTypes";
 
 interface Props {
   world: VoxelWorld | null;
   canvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
-  mode: "add" | "remove";
+  mode: EditMode;
 }
 
 function EditorScene(props: Props): JSX.Element {
