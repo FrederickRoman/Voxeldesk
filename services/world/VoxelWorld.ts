@@ -1,3 +1,28 @@
+/**
+ * @file Manages the 3D graphics shown on the voxel editor scene.
+ * @author Frederick Roman, Homero Roman (and three.js authors)
+ * @license MIT 
+ * 
+ * The purpose of this class is to represent and render the 3D scene shown
+ * in the editor as described by editing actions.
+ * 
+ * |Editor Scene Canvas| <----> |VoxelWorld Class| <----> |Editor Actions Menu|
+ * 
+ * VoxelWorld is based off the official three.js example
+ * by mrdoob (and other three.js authors) named webgl_interactive_voxelpainter.html
+ * @see {@link https://github.com/mrdoob/three.js/blob/master/examples/webgl_interactive_voxelpainter.html}
+ * 
+ * Main changes from on top of the three.js example.
+ * Frederick Roman and Homero Roman:
+ * - turned the the script into a typescript class
+ * - extended said class to enable more editing actions
+ * - implemented an event bus for bidirectional communication
+ * - implemented editing-history tracking
+ * - implemented saving and loading a 3D model in .obj format
+ * - made many changes that enable the 3D scene to live in a React web app
+ *
+ */
+
 import {
   AmbientLight,
   BoxGeometry,
