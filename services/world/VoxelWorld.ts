@@ -96,13 +96,6 @@ class VoxelWorld {
     this.renderer = this.createRenderer(canvas);
   }
   /**
-   * Store color currently selected by the user
-   * @param color
-   */
-  public setPickedColor(color: THREE.ColorRepresentation): void {
-    this.pickedColor = new Color(color);
-  }
-  /**
    * Render the scene seen through the camera onto the canvas.
    */
   public render(): void {
@@ -116,6 +109,13 @@ class VoxelWorld {
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.render();
+  }
+  /**
+   * Store color currently selected by the user
+   * @param color
+   */
+  public setPickedColor(color: THREE.ColorRepresentation): void {
+    this.pickedColor = new Color(color);
   }
   /**
    * On (left-click) mousedown, set:
@@ -315,26 +315,6 @@ class VoxelWorld {
     this.render();
   }
   /**
-   * Zero pad hexadecimal string numbers (e.g. '6')
-   * to have six digits (e.g '6' -> '000006')
-   * @param hex - raw number string
-   * @returns padded hex string of standard length
-   */
-  private zeroPadHexString(hex: string): string {
-    const STD_HEX_LENGTH = 6;
-    const hexLength = hex.length;
-    if (hexLength > STD_HEX_LENGTH) {
-      console.log(`hex color was cut to be ${STD_HEX_LENGTH} of length`);
-      return hex.slice(0, STD_HEX_LENGTH);
-    } else if (hexLength == STD_HEX_LENGTH) {
-      return hex;
-    } else {
-      const zerosLength = STD_HEX_LENGTH - hexLength;
-      const zeros = Array(zerosLength).fill("0").join("");
-      return `${zeros}${hex}`;
-    }
-  }
-  /**
    * Extract the current world 3D model and convert it to .obj and .mtl
    * @returns 3d model as {obj: string, mtl: string}
    */
@@ -392,6 +372,104 @@ class VoxelWorld {
     } catch (error) {
       console.log(error);
     }
+  }
+  /**
+   * Create word's camera setting fov, aspect, near and far constants.
+   * @returns world's camera looking away at the origin in oblique angle
+   */
+  private createCamera(): PerspectiveCamera {
+    const fov = 45;
+    const aspect = window.innerWidth / window.innerHeight;
+    const near = 1;
+    const far = 10000;
+    const camera = new PerspectiveCamera(fov, aspect, near, far);
+    camera.position.set(500, 800, 1300);
+    camera.lookAt(0, 0, 0);
+    return camera;
+  }
+  /**
+   * Create a scene that has a grid plane lit by an ambient directional light.
+   * @returns scene
+   */
+  private createScene(): Scene {
+    const rollOverMesh = this.createRollOver();
+    const gridHelper = this.createGridHelper();
+    const plane = this.createPlane();
+    this.plane = plane;
+    const ambientLight = this.createAmbientLight();
+    const directionalLight = this.createDirectionalLight();
+    const scene = new Scene();
+    scene.background = new Color(0xf0f0f0);
+    scene.add(rollOverMesh);
+    scene.add(gridHelper);
+    scene.add(plane);
+    this.objects.push(plane);
+    scene.add(ambientLight);
+    scene.add(directionalLight);
+    return scene;
+  }
+  /**
+   * Create webGL renderer on canvas with window's size and pixel device ratio.
+   * @param canvas - ref to html canvas element where the scene is rendered
+   * @returns webGL renderer
+   */
+  private createRenderer(canvas: HTMLCanvasElement): WebGLRenderer {
+    const renderer = new WebGLRenderer({ canvas, antialias: true });
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    return renderer;
+  }
+  /**
+   * Create a rollover mesh (which is a temporary transparent voxel that
+   * shows on hover where on the canvas a voxel would be added on press)
+   * @returns rollover mesh
+   */
+  private createRollOver(): Mesh {
+    const rollOverGeo = new BoxGeometry(50, 50, 50);
+    const rollOverMaterial = new MeshBasicMaterial({
+      color: 0xff0000,
+      opacity: 0.5,
+      transparent: true,
+    });
+    const rollOverMesh = new Mesh(rollOverGeo, rollOverMaterial);
+    this.rollOverMesh = rollOverMesh;
+    return rollOverMesh;
+  }
+  /**
+   * Create a grid (a 2D array of lines) with constant size and divisions
+   * @returns grid helper
+   */
+  private createGridHelper(): GridHelper {
+    const gridHelper = new GridHelper(1000, 20);
+    return gridHelper;
+  }
+  /**
+   * Create invisible floor plane with constant size
+   * @returns plane
+   */
+  private createPlane(): Mesh {
+    const geometry = new PlaneGeometry(1000, 1000);
+    geometry.rotateX(-Math.PI / 2);
+    const material = new MeshBasicMaterial({ visible: false });
+    const plane = new Mesh(geometry, material);
+    return plane;
+  }
+  /**
+   * Create soft ambient light for the secondary lighting of the scene.
+   * @returns ambient light
+   */
+  private createAmbientLight(): AmbientLight {
+    const ambientLight = new AmbientLight(0x606060);
+    return ambientLight;
+  }
+  /**
+   * Create hard point directional light for the primary lighting of the scene.
+   * @returns directional light
+   */
+  private createDirectionalLight(): DirectionalLight {
+    const directionalLight = new DirectionalLight(0xffffff);
+    directionalLight.position.set(1, 0.75, 0.5).normalize();
+    return directionalLight;
   }
   /**
    * Clip phi to top view
@@ -558,102 +636,24 @@ class VoxelWorld {
     this.camera.lookAt(0, 0, 0);
   }
   /**
-   * Create word's camera setting fov, aspect, near and far constants.
-   * @returns world's camera looking away at the origin in oblique angle
+   * Zero pad hexadecimal string numbers (e.g. '6')
+   * to have six digits (e.g '6' -> '000006')
+   * @param hex - raw number string
+   * @returns padded hex string of standard length
    */
-  private createCamera(): PerspectiveCamera {
-    const fov = 45;
-    const aspect = window.innerWidth / window.innerHeight;
-    const near = 1;
-    const far = 10000;
-    const camera = new PerspectiveCamera(fov, aspect, near, far);
-    camera.position.set(500, 800, 1300);
-    camera.lookAt(0, 0, 0);
-    return camera;
-  }
-  /**
-   * Create a scene that has a grid plane lit by an ambient directional light.  
-   * @returns scene
-   */
-  private createScene(): Scene {
-    const rollOverMesh = this.createRollOver();
-    const gridHelper = this.createGridHelper();
-    const plane = this.createPlane();
-    this.plane = plane;
-    const ambientLight = this.createAmbientLight();
-    const directionalLight = this.createDirectionalLight();
-    const scene = new Scene();
-    scene.background = new Color(0xf0f0f0);
-    scene.add(rollOverMesh);
-    scene.add(gridHelper);
-    scene.add(plane);
-    this.objects.push(plane);
-    scene.add(ambientLight);
-    scene.add(directionalLight);
-    return scene;
-  }
-  /**
-   * Create webGL renderer on canvas with window's size and pixel device ratio.
-   * @param canvas - ref to html canvas element where the scene is rendered
-   * @returns webGL renderer
-   */
-  private createRenderer(canvas: HTMLCanvasElement): WebGLRenderer {
-    const renderer = new WebGLRenderer({ canvas, antialias: true });
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    return renderer;
-  }
-  /**
-   * Create a rollover mesh (which is a temporary transparent voxel that 
-   * shows on hover where on the canvas a voxel would be added on press)
-   * @returns rollover mesh
-   */
-  private createRollOver(): Mesh {
-    const rollOverGeo = new BoxGeometry(50, 50, 50);
-    const rollOverMaterial = new MeshBasicMaterial({
-      color: 0xff0000,
-      opacity: 0.5,
-      transparent: true,
-    });
-    const rollOverMesh = new Mesh(rollOverGeo, rollOverMaterial);
-    this.rollOverMesh = rollOverMesh;
-    return rollOverMesh;
-  }
-  /**
-   * Create a grid (a 2D array of lines) with constant size and divisions
-   * @returns grid helper
-   */
-  private createGridHelper(): GridHelper {
-    const gridHelper = new GridHelper(1000, 20);
-    return gridHelper;
-  }
-  /**
-   * Create invisible floor plane with constant size 
-   * @returns plane
-   */
-  private createPlane(): Mesh {
-    const geometry = new PlaneGeometry(1000, 1000);
-    geometry.rotateX(-Math.PI / 2);
-    const material = new MeshBasicMaterial({ visible: false });
-    const plane = new Mesh(geometry, material);
-    return plane;
-  }
-  /**
-   * Create soft ambient light for the secondary lighting of the scene.
-   * @returns ambient light
-   */
-  private createAmbientLight(): AmbientLight {
-    const ambientLight = new AmbientLight(0x606060);
-    return ambientLight;
-  }
-  /**
-   * Create hard point directional light for the primary lighting of the scene.
-   * @returns directinal light
-   */
-  private createDirectionalLight(): DirectionalLight {
-    const directionalLight = new DirectionalLight(0xffffff);
-    directionalLight.position.set(1, 0.75, 0.5).normalize();
-    return directionalLight;
+  private zeroPadHexString(hex: string): string {
+    const STD_HEX_LENGTH = 6;
+    const hexLength = hex.length;
+    if (hexLength > STD_HEX_LENGTH) {
+      console.log(`hex color was cut to be ${STD_HEX_LENGTH} of length`);
+      return hex.slice(0, STD_HEX_LENGTH);
+    } else if (hexLength == STD_HEX_LENGTH) {
+      return hex;
+    } else {
+      const zerosLength = STD_HEX_LENGTH - hexLength;
+      const zeros = Array(zerosLength).fill("0").join("");
+      return `${zeros}${hex}`;
+    }
   }
 }
 
