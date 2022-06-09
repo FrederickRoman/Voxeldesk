@@ -1,3 +1,5 @@
+import Link from "next/link";
+import Image from "next/image";
 import {
   AppBar,
   Box,
@@ -8,11 +10,26 @@ import {
   Typography,
 } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
-import Image from "next/image";
+
+interface Props {
+  href: string;
+  children: React.ReactNode;
+}
+
+function NavBarLink(props: Props): JSX.Element {
+  const { href, children } = props;
+  return (
+    <Link href={href} passHref>
+      <Box component="a" sx={{ textDecoration: "none" }}>
+        {children}
+      </Box>
+    </Link>
+  );
+}
 
 function HomeLink(): JSX.Element {
   return (
-    <Box>
+    <NavBarLink href="/">
       <Button>
         <Grid container justifyContent="center" alignItems="center">
           <Grid item sx={{ display: "grid", placeContent: "center", mx: 1 }}>
@@ -35,17 +52,17 @@ function HomeLink(): JSX.Element {
           </Grid>
         </Grid>
       </Button>
-    </Box>
+    </NavBarLink>
   );
 }
 
 function AboutLink(): JSX.Element {
   return (
-    <Box>
+    <NavBarLink href="/about">
       <IconButton size="large" aria-label="about">
         <InfoIcon sx={{ color: "background.default" }} />
       </IconButton>
-    </Box>
+    </NavBarLink>
   );
 }
 
