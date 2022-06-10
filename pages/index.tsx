@@ -47,14 +47,16 @@ const VoxelEditor = dynamic(() => import("components/editor/VoxelEditor"), {
   ),
 });
 
+const VoxelEditorFallback = (): JSX.Element => (
+  <div> Oops! Something went wrong with the editor</div>
+);
+
 const Home: NextPage = () => (
   <>
     <PageHead />
     <HeroBanner />
     <PageIntro />
-    <ErrorBoundary
-      FallbackComponent={() => <div> Oops! Something went wrong</div>}
-    >
+    <ErrorBoundary FallbackComponent={VoxelEditorFallback}>
       <VoxelEditor />
     </ErrorBoundary>
   </>
