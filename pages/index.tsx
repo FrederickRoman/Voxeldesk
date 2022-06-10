@@ -2,7 +2,7 @@ import dynamic from "next/dynamic";
 import Head from "next/head";
 import { ErrorBoundary } from "react-error-boundary";
 import HeroBanner from "components/banner/HeroBanner";
-import { Skeleton } from "@mui/material";
+import { Box, Skeleton, Typography } from "@mui/material";
 import type { NextPage } from "next";
 
 const PageHead = (): JSX.Element => (
@@ -18,6 +18,19 @@ const PageHead = (): JSX.Element => (
       content="Create voxel art online by clicking on a grid."
     />
   </Head>
+);
+
+const PageIntro = (): JSX.Element => (
+  <Box component="section" py={10} sx={{ bgcolor: "black", color: "white" }}>
+    <Box py={5}>
+      <Typography variant="h3" sx={{ textAlign: "center" }}>
+        Create voxel-based 3D models easily
+      </Typography>
+    </Box>
+    <Box component="video" autoPlay loop muted width="100vw">
+      <source src="video/model_display.mp4" type="video/mp4" />
+    </Box>
+  </Box>
 );
 
 /**
@@ -38,6 +51,7 @@ const Home: NextPage = () => (
   <>
     <PageHead />
     <HeroBanner />
+    <PageIntro />
     <ErrorBoundary
       FallbackComponent={() => <div> Oops! Something went wrong</div>}
     >
