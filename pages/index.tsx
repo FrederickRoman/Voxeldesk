@@ -2,7 +2,12 @@ import dynamic from "next/dynamic";
 import Head from "next/head";
 import { ErrorBoundary } from "react-error-boundary";
 import HeroBanner from "components/banner/HeroBanner";
-import { Box, Skeleton, Typography } from "@mui/material";
+import {
+  Grid,
+  Box,
+  Typography,
+  CircularProgress,
+} from "@mui/material";
 import type { NextPage } from "next";
 
 const PageHead = (): JSX.Element => (
@@ -41,9 +46,21 @@ const PageIntro = (): JSX.Element => (
 const VoxelEditor = dynamic(() => import("components/editor/VoxelEditor"), {
   ssr: false,
   loading: () => (
-    <Skeleton variant="rectangular" animation="wave" width="98vw" height="90vh">
-      <canvas width="100vw" height="100vh" />
-    </Skeleton>
+    <Grid
+      container
+      direction="column"
+      justifyContent="center"
+      alignItems="center"
+      gap={6}
+      sx={{ width: "98vw", height: "90vh" }}
+    >
+      <Grid item>
+        <Typography variant="h4"> Loading editor ...</Typography>
+      </Grid>
+      <Grid item>
+        <CircularProgress disableShrink size={80} />
+      </Grid>
+    </Grid>
   ),
 });
 
