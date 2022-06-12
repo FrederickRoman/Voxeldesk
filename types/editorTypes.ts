@@ -1,4 +1,10 @@
-import type { Mesh, BoxGeometry, MeshLambertMaterial, Color } from "three";
+import type {
+  Mesh,
+  BoxGeometry,
+  MeshLambertMaterial,
+  Color,
+  Vector3,
+} from "three";
 
 export type Voxel = Mesh<BoxGeometry, MeshLambertMaterial>;
 export type Action =
@@ -27,8 +33,8 @@ export namespace Edit {
     action: "addition" | "removal";
     object: {
       type: "voxel";
-      position: THREE.Vector3;
-      color: THREE.Color;
+      position: Vector3;
+      color: Color;
     };
   }
   export type History = Step[];
