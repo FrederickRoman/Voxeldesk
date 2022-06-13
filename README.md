@@ -1,34 +1,79 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Voxeldesk
 
-## Getting Started
+<div style="display:flex; flex-direction:column;"><img src="https://github.com/FrederickRoman/Voxeldesk/blob/main/documentation/assets/img/voxeldesk_logo.svg" alt="Voxeldesk logo" height="320"/>
+</div>
 
-First, run the development server:
+## User-friendly voxel-based 3D editor
 
-```bash
-npm run dev
-# or
-yarn dev
+This web apps allows you to create voxel art online by clicking on a 3D grid.
+
+<div style="display:flex; justify-content:center; align-items:center;">
+  <img 
+      src="https://github.com/FrederickRoman/Voxeldesk/blob/main/documentation/assets/img/banner_iPhone_mockup.png" 
+      height="300" 
+      alt="Voxeldesk home page iPad mockup"
+   />
+  <img 
+      src="https://github.com/FrederickRoman/Voxeldesk/blob/main/documentation/assets/img/editor_iPhone_mockup.png" 
+      height="300" 
+      alt="Collatz conjecture home page iPhone mockup"
+   />
+  <img 
+      src="https://github.com/FrederickRoman/Voxeldesk/blob/main/documentation/assets/video/model_display.gif"  
+      height="300" 
+      alt="Voxeldesk model display" 
+    /> 
+</div>
+
+Create and edit 3D models.
+
+<img 
+    src="https://github.com/FrederickRoman/Voxeldesk/blob/main/documentation/assets/video/voxel_addition.gif"  
+    height="300" 
+    alt="Voxeldesk model editing" 
+ /> 
+ 
+Save and load 3D models.
+
+<img 
+    src="https://github.com/FrederickRoman/Voxeldesk/blob/main/documentation/assets/video/model_save_and_load.gif"  
+    height="300" 
+    alt="Voxeldesk model save/loading" 
+ /> 
+
+
+
+## Live website
+
+See [Voxeldesk](https://voxeldesk.vercel.app).
+
+## Main libraries used for this project
+
++ Next.js (TS)
++ three.js
++ react-colorful.js
+
+
+## Project setup
+
+```
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Compiles and hot-reloads
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+```
+npm run dev
+```
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+### Compiles and minifies for production
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+```
+npm run build
+```
 
-## Learn More
+### Lints and fixes files
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+```
+npm run lint
+```
