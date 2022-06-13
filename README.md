@@ -77,3 +77,7 @@ npm run build
 ```
 npm run lint
 ```
+## Acknowledgements
+#### Voxeldesk's voxel-painting is based off and extends the official three.js example created by mrdoob (and other three.js authors) named webgl_interactive_voxelpainter.html
+    https://github.com/mrdoob/three.js/blob/master/examples/webgl_interactive_voxelpainter.html
+#### The changes and extensions applied to this example are further discussed in the [VoxelWorld class](https://github.com/FrederickRoman/Voxeldesk/blob/main/services/world/VoxelWorld.ts)
