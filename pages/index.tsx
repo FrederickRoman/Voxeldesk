@@ -44,7 +44,7 @@ const PageIntro = (): JSX.Element => (
  * import dynamically VoxelEditor component and disable SSR.
  */
 const VoxelEditor = dynamic(() => import("components/editor/VoxelEditor"), {
-  ssr: false,
+  ssr: process.env.NODE_ENV === "production",
   loading: () => (
     <Grid
       container
